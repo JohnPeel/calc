@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <utility>
+#include <cassert>
 #include "Prime.h"
 #include "Utility.h"
 
@@ -22,9 +23,11 @@ bool isProbablePrime(int n) {
     if (sqrtn == round(sqrtn))
         return false;
 
-    // int D = findD(n);
-    // TODO: implement lucas!
+    int D = findD(n);
+    if (not lucas_pp(n, D, 1, (1 - D) / 4))
+        return false;
 
+    {} //CLion likes to whine...
     return true;
 }
 
@@ -35,7 +38,7 @@ std::vector<bool> getBits(int k) {
     return bits;
 }
 
-void lucas_seq(int& U, int& V, int& k, int n, int P, int Q, int D) {
+void lucas_seq(int& U, int& V, int k, int n, int P, int Q, int D) {
     int s = 1;
     std::vector<bool> bits = getBits(k);
     bits.erase(bits.begin());
@@ -46,47 +49,54 @@ void lucas_seq(int& U, int& V, int& k, int n, int P, int Q, int D) {
         s *= 2;
 
         if (bit) {
-            if (not (P * U + V) & 1)
-                U = (P * U + V) >> 1;
-            else
-                U = (P * U + V + n) >> 1;
+            int newU, newV;
 
-            if (not (D * U + P * V) & 1)
-                V = (D * U + P * V) >> 1;
+            if ((P * U + V) % 2 == 0)
+                newU = ((P * U + V) / 2) % n;
             else
-                V = (D * U + P * V + n) >> 1;
+                newU = ((P * U + V + n) / 2) % n;
+
+            if ((D * U + P * V) % 2 == 0)
+                newV = ((D * U + P * V) / 2) % n;
+            else
+                newV = ((D * U + P * V + n) / 2) % n;
 
             s += 1;
-            U %= n;
-            V %= n;
+            U = newU;
+            V = newV;
         }
     }
 }
 
 bool lucas_pp(int n, int D, int P, int Q) {
+    assert(std::__gcd(n, D) == 1);
+
     int U = 1, V = P, k = n + 1;
 
-    std::cout << "lucas_seq(U = 1, V = " << P << ", k = " << k << ", n = " << n << ", P = " << P << ", Q = " << Q << ", D = " << D << ") = " << U << ", " << V << std::endl;
     lucas_seq(U, V, k, n, P, Q, D);
+    std::cout << "lucas_seq(U = 1, V = " << P << ", k = " << k << ", n = " << n << ", P = " << P << ", Q = " << Q << ", D = " << D << ") -> U = " << U << ", V = " << V << std::endl;
 
     if (U != 0)
         return false;
 
     int s = 0;
 
-    while (not k & 1) {
-        k = k >> 1;
+    while (k % 2 == 0) {
+        k /= 2;
         s += 1;
     }
 
-    U = 1; V = P;
+    U = 1;
+    V = P;
     lucas_seq(U, V, k, n, P, Q, D);
 
     if (U == 0)
         return true;
 
     for (int r = 1; r < s; r++) {
-
+        U = (U * V) % n;
+        V = (modpow(V, 2, n) - 2 * modpow(Q, k, n)) % n;
+        k *= 2;
         if (V == 0)
             return true;
     }
@@ -95,29 +105,19 @@ bool lucas_pp(int n, int D, int P, int Q) {
 }
 
 int jacobi(int a, int n) {
-    int j = 1;
-    while (a != 0) {
-        while (not a & 1) {
-            a /= 2;
-            if ((n % 8 == 3) or (n % 8 == 5))
-                j *= -1;
-        }
-        std::swap<int>(a, n);
-        if ((a % 4 == 3) and (n % 4 == 3))
-            j *= -1;
-        a %= n;
-    }
+    assert(n > 0);
 
-    return (n == 1) ? j : 0;
+    if (n == 1)
+        return 1;
 
+    a %= n; // Rule 2
 
-    /*// Simple Answers
-    if (n == 1) return 1;
-    if ((a == 0) or (a == 1)) return a;
+    if ((a == 0) or (a == 1))
+        return a;
 
     // Rule 3
-    //if (std::__gcd(a, n) != 1)
-    //    return 0;
+    if (std::__gcd(a, n) != 1)
+        return 0;
 
     // Rule 8
     if (a == 2)
@@ -135,18 +135,17 @@ int jacobi(int a, int n) {
     // Rule 4
     if (a < 0)
         return jacobi(-1, n) * jacobi(-a, n);
-    if (not a & 1)
-        return jacobi(2, n) * jacobi(a >> 1, n);
+    if (a % 2 == 0)
+        return jacobi(2, n) * jacobi(a / 2, n);
 
-    // Rule 2 (with a check that we're not calculating the same a)
-    if (a % n != a)
-        return jacobi(a % n, n);
+    assert(a > 0);
+    assert(n % 2 != 0);
 
     // Rule 6
     if ((a % 4 == 3) and (n % 4 == 3))
         return -jacobi(n, a);
     else
-        return jacobi(n, a);*/
+        return jacobi(n, a);
 }
 
 int findD(int n) {
@@ -162,8 +161,8 @@ bool millerRabin(int n, int b) {
     int d = n - 1;
     int r = 0;
 
-    while (not d & 1) {
-        d = d >> 1;
+    while (d % 2 == 0) {
+        d /= 2;
         r += 1;
     }
 
