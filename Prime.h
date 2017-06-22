@@ -4,12 +4,13 @@
 #include <vector>
 #include <ctime>
 
-bool isProbablePrime(int n);
-int jacobi(int a, int n);
-int findD(int n);
-bool lucas_pp(int n, int D, int P, int Q);
-bool millerRabin(int n, int b = 2);
-int pollardRho(int n);
+bool isProbablePrime(uint64_t n);
+int32_t jacobi(int64_t a, uint64_t n);
+int32_t findD(int64_t n);
+void lucasSeq(int64_t& U, int64_t& V, uint64_t k, uint64_t n, int32_t P, int32_t Q, int32_t D);
+bool lucasPP(uint64_t n, int32_t D, int32_t P, int32_t Q);
+bool millerRabin(int64_t n, int64_t b);
+int64_t pollardRho(int64_t n);
 
 std::vector<int> getPrimeFactors(int n);
 

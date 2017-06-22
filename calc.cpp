@@ -17,14 +17,5 @@ int main(void) {
     Expression* exprSimp = expr->simplify();
     cout << "Simplified: \t" << exprSimp->getString() << " = " << exprSimp->getValue() << endl;
 
-    for (int i = 2; i < 100; i++) {
-        cout << i << " = ";
-        vector<int> factors = getPrimeFactors(i);
-
-        for (int factor : factors)
-            cout << factor << " ";
-        cout << endl;
-    }
-
     return 0;
 }

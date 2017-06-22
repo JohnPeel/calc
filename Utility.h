@@ -11,15 +11,36 @@ Expression* multiplyFactors(std::vector<Expression*> list);
 std::vector<Expression*> getCommonFactors(std::vector<Expression*> left, std::vector<Expression*> right);
 
 template <typename T>
-T modpow(T base, T exp, T modulus) {
-    base %= modulus;
-    T result = 1;
-    while (exp > 0) {
-        if (exp & 1) result = (result * base) % modulus;
-        base = (base * base) % modulus;
-        exp >>= 1;
+static T mod(T a, T b)
+{
+    int64_t r = a % b;
+    return r < 0 ? r + b : r;
+}
+
+template <typename T>
+static T mul_mod(T a, T b, T m)
+{
+    long double x;
+    T c;
+    int64_t r;
+    if (a >= m) a = mod<T>(a, m);
+    if (b >= m) b = mod<T>(b, m);
+    x = a;
+    c = x * b / m;
+    return mod<T>((int64_t)(a * b - c * m), m);
+}
+
+template <typename T>
+static T pow_mod(T a, T b, T m)
+{
+    T r = 1;
+    while (b > 0) {
+        if(b % 2 != 0)
+            r = mul_mod<T>(r, a, m);
+        b = b >> 1;
+        a = mul_mod<T>(a, a, m);
     }
-    return result;
+    return mod<T>(r, m);
 }
 
 template <typename T> bool PComp(T* a, T* b)
