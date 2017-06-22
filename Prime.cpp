@@ -1,4 +1,7 @@
+#include <bitset>
 #include <cmath>
+#include <iostream>
+#include <utility>
 #include "Prime.h"
 #include "Utility.h"
 
@@ -19,19 +22,102 @@ bool isProbablePrime(int n) {
     if (sqrtn == round(sqrtn))
         return false;
 
-    // TODO: lucas test!
+    // int D = findD(n);
+    // TODO: implement lucas!
 
     return true;
 }
 
+std::vector<bool> getBits(int k) {
+    std::vector<bool> bits;
+    do bits.push_back((bool)(k & 1)); while (k >>= 1);
+    std::reverse(bits.begin(), bits.end());
+    return bits;
+}
+
+void lucas_seq(int& U, int& V, int& k, int n, int P, int Q, int D) {
+    int s = 1;
+    std::vector<bool> bits = getBits(k);
+    bits.erase(bits.begin());
+
+    for (bool bit : bits) {
+        U = (U * V) % n;
+        V = (modpow(V, 2, n) - 2 * modpow(Q, s, n)) % n;
+        s *= 2;
+
+        if (bit) {
+            if (not (P * U + V) & 1)
+                U = (P * U + V) >> 1;
+            else
+                U = (P * U + V + n) >> 1;
+
+            if (not (D * U + P * V) & 1)
+                V = (D * U + P * V) >> 1;
+            else
+                V = (D * U + P * V + n) >> 1;
+
+            s += 1;
+            U %= n;
+            V %= n;
+        }
+    }
+}
+
+bool lucas_pp(int n, int D, int P, int Q) {
+    int U = 1, V = P, k = n + 1;
+
+    std::cout << "lucas_seq(U = 1, V = " << P << ", k = " << k << ", n = " << n << ", P = " << P << ", Q = " << Q << ", D = " << D << ") = " << U << ", " << V << std::endl;
+    lucas_seq(U, V, k, n, P, Q, D);
+
+    if (U != 0)
+        return false;
+
+    int s = 0;
+
+    while (not k & 1) {
+        k = k >> 1;
+        s += 1;
+    }
+
+    U = 1; V = P;
+    lucas_seq(U, V, k, n, P, Q, D);
+
+    if (U == 0)
+        return true;
+
+    for (int r = 1; r < s; r++) {
+
+        if (V == 0)
+            return true;
+    }
+
+    return false;
+}
+
 int jacobi(int a, int n) {
-    // Simple Answers
+    int j = 1;
+    while (a != 0) {
+        while (not a & 1) {
+            a /= 2;
+            if ((n % 8 == 3) or (n % 8 == 5))
+                j *= -1;
+        }
+        std::swap<int>(a, n);
+        if ((a % 4 == 3) and (n % 4 == 3))
+            j *= -1;
+        a %= n;
+    }
+
+    return (n == 1) ? j : 0;
+
+
+    /*// Simple Answers
     if (n == 1) return 1;
     if ((a == 0) or (a == 1)) return a;
 
     // Rule 3
-    if (std::__gcd(a, n) != 1)
-        return 0;
+    //if (std::__gcd(a, n) != 1)
+    //    return 0;
 
     // Rule 8
     if (a == 2)
@@ -42,11 +128,13 @@ int jacobi(int a, int n) {
                 return -1;
         }
 
-    // Rule 4 and Rule 7
-    if (a < 0)
-        return (int)std::pow(-1, (n - 1) >> 1) * jacobi(-a, n);
+    // Rule 7
+    if (a == -1)
+        return (n % 4 == 1) ? 1 : -1;
 
     // Rule 4
+    if (a < 0)
+        return jacobi(-1, n) * jacobi(-a, n);
     if (not a & 1)
         return jacobi(2, n) * jacobi(a >> 1, n);
 
@@ -58,7 +146,16 @@ int jacobi(int a, int n) {
     if ((a % 4 == 3) and (n % 4 == 3))
         return -jacobi(n, a);
     else
-        return jacobi(n, a);
+        return jacobi(n, a);*/
+}
+
+int findD(int n) {
+    int D = 5;
+    while (jacobi(D, n) != -1) {
+        D += (D < 0) ? -2 : 2;
+        D *= -1;
+    }
+    return D;
 }
 
 bool millerRabin(int n, int b) {
@@ -70,13 +167,13 @@ bool millerRabin(int n, int b) {
         r += 1;
     }
 
-    int x = modular_pow(b, d, n);
+    int x = modpow(b, d, n);
 
     if ((x == 1) or (x == n - 1))
          return true;
 
     for (int i = 0; i < r - 1; i++) {
-        x = modular_pow(x, 2, n);
+        x = modpow(x, 2, n);
         if (x == 1)
             return false;
         if (x == n - 1)
@@ -93,7 +190,7 @@ int _pollardRho(int n, int x, int c) {
 
     while (factor == 1) {
         for (int count = 1; count <= cycle_size && factor <= 1; count++) {
-            x = modular_pow(x, 2, n) + c % n;
+            x = modpow(x, 2, n) + c % n;
             factor = std::__gcd(abs(x - y), n);
         }
 

@@ -2,20 +2,6 @@
 #include "Utility.h"
 #include "Prime.h"
 
-int modular_pow(int base, int exp, int mod) {
-    int ret = 1;
-
-    while (exp > 0) {
-        if (exp & 1)
-            ret = (ret * base) % mod;
-
-        exp >>= 1;
-
-        base = (base * base) % mod;
-    }
-    return ret;
-}
-
 Expression* multiplyFactors(std::vector<Expression*> list) {
     if (list.size() == 0)
         return new Integer(1);
