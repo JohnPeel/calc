@@ -56,7 +56,7 @@ Expression* Exponentiation::simplify() {
             return one;
         if (rightSideInt->getValue() == 1)
             return leftSide;
-        return multiplyFactors(getNumeratorFactors());
+        return multiplyFactors(getNumeratorFactors())->simplify();
     }
 
     return new Exponentiation(leftSide, rightSide);

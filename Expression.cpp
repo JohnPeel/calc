@@ -5,6 +5,11 @@ Expression* Expression::simplify() {
     return this;
 }
 
+
+bool Expression::hasValue() {
+    return false;
+}
+
 double Expression::getValue() {
     throw "Base class method called.";
 }

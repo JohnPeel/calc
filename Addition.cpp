@@ -84,7 +84,17 @@ std::vector<Expression*> Addition::getAdditiveTerms() {
 }
 
 Expression* Addition::simplify() {
-    return multiplyFactors(commutativeSimplify<Addition>(this, leftSide->simplify(), rightSide->simplify())->getNumeratorFactors());
+    Expression* expr = commutativeSimplify<Addition>(this, leftSide->simplify(), rightSide->simplify());
+
+    std::vector<Expression*> numFactors = expr->getNumeratorFactors();
+    std::vector<Expression*> denFactors = expr->getDenominatorFactors();
+
+    if ((denFactors.size() == 1) and (*(denFactors.front()) == *one)) {
+        if (numFactors.size() > 1)
+            return multiplyFactors(numFactors)->simplify();
+        return numFactors.front();
+    } else
+        return (new Division(multiplyFactors(numFactors), multiplyFactors(denFactors)))->simplify();
 }
 
 std::string Addition::getString() {

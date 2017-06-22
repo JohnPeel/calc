@@ -1,21 +1,18 @@
 #include <iostream>
-#include "Integer.h"
-#include "Addition.h"
-#include "Subtraction.h"
-#include "Multiplication.h"
-#include "Division.h"
-#include "Variable.h"
-#include "Exponentiation.h"
-#include "Prime.h"
+#include "ShuntingYard.h"
 
 using namespace std;
 
 int main(void) {
-    Expression* expr = new Subtraction(new Multiplication(new Integer(8), new Exponentiation(new Integer(2), new Division(one, new Integer(2)))), new Integer(4));
-    cout << "Input: \t\t" << expr->getString() << " = " << expr->getValue() << endl;
+    cout << "> ";
+    string data = "(4x - 2)/(2x)";
+    cout << data << endl;//getline(cin, data);
 
-    Expression* exprSimp = expr->simplify();
-    cout << "Simplified: \t" << exprSimp->getString() << " = " << exprSimp->getValue() << endl;
+    ShuntingYard parser = ShuntingYard(data);
+    Expression* expr = parser.process();
+
+    cout << "Original:\t" << expr->getString() << endl;
+    cout << "Simplified:\t" << expr->simplify()->getString() << endl;
 
     return 0;
 }

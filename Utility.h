@@ -6,9 +6,18 @@
 #include "Multiplication.h"
 #include <vector>
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 Expression* multiplyFactors(std::vector<Expression*> list);
 std::vector<Expression*> getCommonFactors(std::vector<Expression*> left, std::vector<Expression*> right);
+
+template <typename T>
+T strToT(std::string data) {
+    T ret;
+    std::istringstream(data) >> ret;
+    return ret;
+}
 
 template <typename T>
 static T mod(T a, T b)

@@ -6,6 +6,7 @@
 
 class Expression {
 public:
+    virtual bool hasValue();
     virtual double getValue();
 
     virtual Expression* getLeftSide();

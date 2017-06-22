@@ -14,13 +14,16 @@ protected:
 public:
     Variable(std::string, Expression*);
     double getValue() override;
+    bool hasValue() override;
 
     std::string getString() override;
+
+    static bool find(std::string name, Expression*& foundVar);
 };
 
 static Variable* pi = new Variable("pi", new Double(M_PI));
 static Variable* e = new Variable("e", new Double(M_E));
-static Variable* i = new Variable("i", new Integer(1));
+static Variable* i = new Variable("i", NULL);
 
 
 #endif //CALC_VARIABLE_H
