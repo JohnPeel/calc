@@ -59,6 +59,7 @@ EParserToken Parser::nextToken() {
                 pos++;
             token = tk_WhiteSpace;
             break;
+        case '.':
         case '0' ... '9':
             token = tk_typ_Integer;
             while (((data[pos] >= '0') and (data[pos] <= '9')) or (data[pos] == '.')) {
@@ -78,6 +79,10 @@ EParserToken Parser::nextToken() {
 
                 if (ident == "rt")
                     token = tk_op_Rt;
+                if (ident == "ln")
+                    token = tk_op_Ln;
+                if (ident == "log")
+                    token = tk_op_Log;
             }
 
             break;
@@ -164,6 +169,20 @@ EParserToken Parser::nextTokenNoJunk() {
     while ((token == tk_NewLine) or (token == tk_WhiteSpace))
         tok = nextToken();
     return tok;
+}
+
+EParserToken Parser::peek() {
+    unsigned int curPos = pos;
+    EParserToken ret = nextToken();
+    pos = curPos;
+    return ret;
+}
+
+EParserToken Parser::peekNoJunk() {
+    unsigned int curPos = pos;
+    EParserToken ret = nextTokenNoJunk();
+    pos = curPos;
+    return ret;
 }
 
 Token Parser::getToken() {

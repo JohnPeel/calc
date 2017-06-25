@@ -1,51 +1,56 @@
 #include "Expression.h"
 #include "Integer.h"
-
-Expression* Expression::simplify() {
-    return this;
-}
-
-
-bool Expression::hasValue() {
-    return false;
-}
+#include "Utility.h"
+#include "Division.h"
 
 double Expression::getValue() {
     throw "Base class method called.";
 }
 
-Expression* Expression::getLeftSide() {
-    throw "Base class method called.";
+std::deque<Expression*> Expression::getNumeratorFactors() {
+    std::deque<Expression*> dq;
+    dq.push_back(this);
+    return dq;
 }
 
-Expression* Expression::getRightSide() {
-    throw "Base class method called.";
+std::deque<Expression*> Expression::getDenominatorFactors() {
+    std::deque<Expression*> dq;
+    return dq;
 }
 
-std::vector<Expression*> Expression::getNumeratorFactors() {
-    std::vector<Expression*> vect;
-    vect.push_back(this);
-    return vect;
+std::deque<Expression*> Expression::getFactors() {
+    std::deque<Expression*> ret;
+    std::deque<Expression*> num = getNumeratorFactors();
+    std::deque<Expression*> den = getDenominatorFactors();
+
+    for (Expression* exp : num)
+        ret.push_back(exp);
+    for (Expression* exp : den)
+        ret.push_back(new Division(one, exp));
+    return ret;
 }
 
-std::vector<Expression*> Expression::getDenominatorFactors() {
-    std::vector<Expression*> vect;
-    vect.push_back(one);
-    return vect;
-}
-
-std::vector<Expression*> Expression::getAdditiveTerms() {
-    std::vector<Expression*> vect;
-    vect.push_back(this);
-    return vect;
+std::deque<Expression*> Expression::getAdditiveTerms() {
+    std::deque<Expression*> dq;
+    dq.push_back(this);
+    return dq;
 }
 
 std::string Expression::getString() {
     throw "Base class method called.";
 }
 
+bool Expression::isNeg() {
+    bool neg = false;
+    std::deque<Expression*> terms = getFactors();
+    for (Expression* factor : terms)
+        if (*factor == *negOne)
+            neg = not neg;
+    return neg;
+}
+
 bool Expression::operator==(Expression& rhs) {
-    return getValue() == rhs.getValue();
+    return getString() == rhs.getString();
 }
 
 bool Expression::operator!=(Expression& rhs) {
@@ -53,5 +58,37 @@ bool Expression::operator!=(Expression& rhs) {
 }
 
 bool Expression::operator<(Expression &rhs) {
-    return getValue() < rhs.getValue();
+    return getString() < rhs.getString();
+}
+
+bool OpExpression::operator==(Expression& rhs) {
+    OpExpression* rhsExpr = dynamic_cast<OpExpression*>(&rhs);
+    if (not rhsExpr)
+        return false;
+
+    return *(getLeftSide()) == *(rhsExpr->getLeftSide());
+}
+
+std::string OpExpression::getString() {
+    std::string left = getLeftSide()->getString();
+    if (leftSide->needParenthesis())
+        left = "(" + left + ")";
+
+    return left + " " + getOpString();
+}
+
+std::string BiOpExpression::getString() {
+    std::string right = getRightSide()->getString();
+    if (rightSide->needParenthesis())
+        right = "(" + right + ")";
+
+    return OpExpression::getString() + " " + right;
+}
+
+bool BiOpExpression::operator==(Expression& rhs) {
+    BiOpExpression* rhsExpr = dynamic_cast<BiOpExpression*>(&rhs);
+    if (not rhsExpr)
+        return false;
+
+    return (getOpString() == rhsExpr->getOpString()) and (*(leftSide) == *(rhsExpr->leftSide)) and (*(rightSide) == *(rhsExpr->rightSide));
 }

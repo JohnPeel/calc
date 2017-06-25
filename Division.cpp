@@ -1,86 +1,73 @@
 #include "Division.h"
 #include "Utility.h"
 
-Division::Division(Expression* leftSide, Expression* rightSide) {
-    this->leftSide = leftSide;
-    this->rightSide = rightSide;
-}
-
 double Division::getValue() {
     return leftSide->getValue() / rightSide->getValue();
 }
 
-Expression *Division::getLeftSide() {
-    return leftSide;
+std::deque<Expression*> Division::getNumeratorFactors() {
+    return leftSide->getFactors();
 }
 
-Expression *Division::getRightSide() {
-    return rightSide;
+std::deque<Expression*> Division::getDenominatorFactors() {
+    return rightSide->getFactors();
 }
 
-std::vector<Expression*> Division::getNumeratorFactors() {
-    std::vector<Expression*> left, right;
-    left = leftSide->getNumeratorFactors();
-    right = rightSide->getDenominatorFactors();
-    left.insert(left.end(), right.begin(), right.end());
-    return left;
-}
+Expression* Division::simplify() {
+    Expression* left = leftSide->simplify();
+    Expression* right = rightSide->simplify();
 
-std::vector<Expression*> Division::getDenominatorFactors() {
-    std::vector<Expression*> left, right;
-    left = leftSide->getDenominatorFactors();
-    right = rightSide->getNumeratorFactors();
-    left.insert(left.begin(), right.begin(), right.end());
-    return left;
-}
+    if (*right == *one)
+        return left;
+    if (*right == *negOne)
+        return new Multiplication(negOne, left);
 
-Expression *Division::simplify() {
-    std::vector<Expression*> num = getNumeratorFactors();
-    std::vector<Expression*> den = getDenominatorFactors();
-    std::vector<Expression*> commonFactors = getCommonFactors(num, den);
+    std::deque<Expression*> allNum, allDen;
+    for (Expression* term : left->getNumeratorFactors())
+        if (*term != *one)
+            allNum.push_back(term);
+    for (Expression* term : left->getDenominatorFactors())
+        if (*term != *one)
+            allDen.push_back(term);
+    for (Expression* term : right->getNumeratorFactors())
+        if (*term != *one)
+            allDen.push_back(term);
+    for (Expression* term : right->getDenominatorFactors())
+        if (*term != *one)
+            allNum.push_back(term);
 
-    for (Expression* commonItem : commonFactors) {
-        for (Expression* item : num)
-            if (item->getValue() == commonItem->getValue()) {
-                num.erase(std::find(num.begin(), num.end(), item));
-                break;
+    for (Expression *item : allDen)
+        if (*item == *negOne) {
+            allNum.push_back(negOne);
+            allDen.erase(std::find(allDen.begin(), allDen.end(), item));
+        }
+
+    if ((allDen.size() > 1) or ((allDen.size() == 1) and (*allDen[0] != *one))) {
+        std::deque<Expression *> commonFactors = getCommonFactors(allNum, allDen);
+
+        if (commonFactors.size() >= 1) {
+            for (Expression *commonItem : commonFactors) {
+                for (Expression *item : allNum)
+                    if ((*item == *commonItem) or (*item == *one)) {
+                        allNum.erase(std::find(allNum.begin(), allNum.end(), item));
+                        break;
+                    }
+                for (Expression *item : allDen)
+                    if ((*item == *commonItem) or (*item == *one)) {
+                        allDen.erase(std::find(allDen.begin(), allDen.end(), item));
+                        break;
+                    }
             }
-        for (Expression* item : den)
-            if (item->getValue() == commonItem->getValue()) {
-                den.erase(std::find(den.begin(), den.end(), item));
-                break;
-            }
-    }
 
-    if (den.size() == 0)
-        return multiplyFactors(num)->simplify();
+            if ((allDen.size() == 0) or ((allDen.size() == 1) and (*allDen[0] == *one)))
+                return multiplyFactors(allNum, true);
 
-    if ((den.size() == 1) and (*(den.front()) == *negOne)) {
-        num.push_back((Expression *&&) den.front());
-        return multiplyFactors(num)->simplify();
+            if (allDen.size() > 0)
+                return new Division(multiplyFactors(allNum, true), multiplyFactors(allDen, true));
+        }
     }
 
     // TODO: Rationalize denominator!
 
-    return new Division(multiplyFactors(num)->simplify(), multiplyFactors(den)->simplify());
-}
-
-std::string Division::getString() {
-    Integer* leftSideInt = dynamic_cast<Integer*>(leftSide);
-    Integer* rightSideInt = dynamic_cast<Integer*>(rightSide);
-    std::string ret;
-
-    if (leftSideInt)
-        ret += leftSide->getString();
-    else
-        ret += "(" + leftSide->getString() + ")";
-
-    ret += " / ";
-
-    if (rightSideInt)
-        ret += rightSide->getString();
-    else
-        ret += "(" + rightSide->getString() + ")";
-
-    return ret;
+    return this;
 }

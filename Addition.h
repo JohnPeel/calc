@@ -3,22 +3,17 @@
 
 #include "Expression.h"
 
-class Addition : public Expression {
-protected:
-    Expression* leftSide;
-    Expression* rightSide;
+class Addition : public BiOpExpression {
 public:
-    Addition(Expression*, Expression*);
+    Addition(Expression* left, Expression* right) : BiOpExpression(left, right) {};
     double getValue() override;
 
-    Expression* getLeftSide() override;
-    Expression* getRightSide() override;
+    std::deque<Expression*> getNumeratorFactors() override;
 
-    std::vector<Expression*> getNumeratorFactors() override;
-
-    std::vector<Expression*> getAdditiveTerms() override;
+    std::deque<Expression*> getAdditiveTerms() override;
     Expression* simplify() override;
 
+    std::string getOpString() override { return "+"; };
     std::string getString() override;
 };
 

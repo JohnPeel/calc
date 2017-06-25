@@ -9,13 +9,21 @@ protected:
 public:
     Integer(int);
     double getValue() override;
+    bool hasValue() override { return true; };
+    bool hasExactValue() override { return true; };
 
-    std::vector<Expression *> getNumeratorFactors() override;
+    std::deque<Expression*> getNumeratorFactors() override;
 
+    Expression* simplify() override { return this; };
+    bool needParenthesis() override { return value < 0; };
     std::string getString() override;
 };
 
-static Expression* one = new Integer(1);
-static Expression* negOne = new Integer(-1);
+// Some Integers used a lot in places.
+extern Expression* negOne;
+extern Expression* zero;
+extern Expression* one;
+extern Expression* two;
+extern Expression* three;
 
 #endif //CALC_INTEGER_H

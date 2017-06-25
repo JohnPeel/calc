@@ -3,22 +3,20 @@
 
 #include "Expression.h"
 
-class Division : public Expression {
-protected:
-    Expression* leftSide;
-    Expression* rightSide;
+class Division : public BiOpExpression {
 public:
-    Division(Expression*, Expression*);
+    Division(Expression* left, Expression* right) : BiOpExpression(left, right) {};
     double getValue() override;
 
-    Expression* getLeftSide() override;
-    Expression* getRightSide() override;
+    std::deque<Expression*> getNumeratorFactors() override;
+    std::deque<Expression*> getDenominatorFactors() override;
+    std::deque<Expression*> getFactors() override { return getNumeratorFactors(); };
 
-    std::vector<Expression*> getNumeratorFactors() override;
-    std::vector<Expression*> getDenominatorFactors() override;
+    bool hasValue() override { return hasExactValue(); };
+    bool hasExactValue() override { return getRightSide()->getValue() != 0; };
 
     Expression* simplify() override;
-    std::string getString() override;
+    std::string getOpString() override { return "/"; };
 };
 
 

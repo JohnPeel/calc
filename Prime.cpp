@@ -137,9 +137,9 @@ int32_t jacobi(int64_t a, uint64_t n) {
 
     // Rule 6
     if ((a % 4 == 3) and (n % 4 == 3))
-        return -jacobi(n, a);
+        return -jacobi(n, (uint64_t)a);
     else
-        return jacobi(n, a);
+        return jacobi(n, (uint64_t)a);
 }
 
 int32_t findD(int64_t n) {
@@ -203,13 +203,14 @@ int64_t pollardRho(int64_t n) {
     if (n == 1)
         return 1;
 
-    if (isProbablePrime(n))
-        return n;
-
-    if (not n & 1)
+    if (n % 2 == 0)
         return 2;
 
-    return _pollardRho(n, 2, 1);
+    int64_t factor = n;
+    while ((not isProbablePrime((uint64_t)n)) and (factor >= n))
+        factor = _pollardRho(n, 2, 1);
+
+    return factor;
 }
 
 std::vector<int> getPrimeFactors(int n) {
@@ -221,12 +222,12 @@ std::vector<int> getPrimeFactors(int n) {
     }
 
     int m = 1;
-
     while (n / m != 1) {
         int factor = (int)pollardRho(n / m);
         ret.push_back(factor);
         m *= factor;
     }
 
+    std::sort(ret.begin(), ret.end());
     return ret;
 }

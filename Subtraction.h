@@ -9,7 +9,17 @@
 class Subtraction : public Addition {
 public:
     Subtraction(Expression* leftSide, Expression* rightSide) : Addition(leftSide, new Multiplication(negOne, rightSide)) { };
-    std::string getString() override { return leftSide->getString() + " - " + rightSide->getRightSide()->getString(); };
+
+    std::string getOpString() override { return "-"; }
+
+    Expression* getRightSide() override {
+        Multiplication* right = dynamic_cast<Multiplication*>(rightSide);
+
+        if ((right) and (*(right->getLeftSide()) == *negOne))
+            return right->getRightSide();
+
+        return rightSide;
+    };
 };
 
 #endif //CALC_SUBTRACTION_H

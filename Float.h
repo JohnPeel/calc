@@ -5,20 +5,13 @@
 
 class Float : public Expression {
 protected:
-    float value;
-public:
-    Float(float);
-    double getValue() override;
-
-    std::string getString() override;
-};
-
-class Double : public Expression {
-protected:
     double value;
 public:
-    Double(double);
+    Float(double);
     double getValue() override;
+    bool hasValue() override { return true; };
+
+    Expression* simplify() override;
 
     std::string getString() override;
 };

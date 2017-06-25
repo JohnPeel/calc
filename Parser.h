@@ -19,6 +19,8 @@ enum EParserToken {
     tk_cmp_NotEqual,
 
     tk_op_Divide,
+    tk_op_Ln,
+    tk_op_Log,
     tk_op_Minus,
     tk_op_Multiply,
     tk_op_Plus,
@@ -49,6 +51,8 @@ static const char* ParserTokenStr[] = {
         "NotEqual",
 
         "Divide",
+        "Ln",
+        "Log"
         "Minus",
         "Multiply",
         "Plus",
@@ -85,6 +89,8 @@ static EOperatorAssociative OperatorAssociative[] = {
         assocLeft, //tk_cmp_NotEqual,
 
         assocLeft, //tk_op_Divide,
+        assocRight, //tk_op_Ln
+        assocRight, //tk_op_Log
         assocLeft, //tk_op_Minus,
         assocLeft, //tk_op_Multiply,
         assocLeft, //tk_op_Plus,
@@ -115,6 +121,8 @@ static unsigned char OperatorPrecedence[] = {
         0, //tk_cmp_NotEqual,
 
         3, //tk_op_Divide,
+        4, //tk_op_Ln
+        4, //tk_op_Log
         2, //tk_op_Minus,
         3, //tk_op_Multiply,
         2, //tk_op_Plus,
@@ -154,6 +162,8 @@ public:
     void reset();
     EParserToken nextToken();
     EParserToken nextTokenNoJunk();
+    EParserToken peek();
+    EParserToken peekNoJunk();
     Token getToken();
 };
 

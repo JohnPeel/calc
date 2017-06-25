@@ -2,28 +2,52 @@
 #include "Utility.h"
 #include "Prime.h"
 
-Expression* multiplyFactors(std::vector<Expression*> list) {
+Expression* multiplyFactors(std::deque<Expression*> list, bool simplify) {
     if (list.size() == 0)
         return new Integer(1);
 
-    Expression* ret = list.back();
-    list.pop_back();
+    Expression* ret = (simplify) ? list.front()->simplify() : list.front();
+    list.pop_front();
 
     while (list.size() > 0) {
-        ret = new Multiplication(ret, list.back());
-        list.pop_back();
+        Expression* term = (simplify) ? list.front()->simplify() : list.front();
+        list.pop_front();
+
+        if (*term != *one)
+            ret = new Multiplication(ret, term);
     }
 
     return ret;
 }
 
-std::vector<Expression*> getCommonFactors(std::vector<Expression*> left, std::vector<Expression*> right) {
-    std::vector<Expression*> commonFactors;
+Expression* addTerms(std::deque<Expression*> list, bool simplify) {
+    if (list.size() == 0)
+        return new Integer(0);
 
-    std::sort(left.begin(), left.end(), PComp<Expression>);
-    std::sort(right.begin(), right.end(), PComp<Expression>);
+    Expression* ret = (simplify) ? list.front()->simplify() : list.front();
+    list.pop_front();
 
-    std::set_intersection(left.begin(), left.end(), right.begin(), right.end(), std::back_inserter(commonFactors), PComp<Expression>);
+    while (list.size() > 0) {
+        Expression* term = (simplify) ? list.front()->simplify() : list.front();
+        list.pop_front();
+
+        if (*term != *zero)
+            ret = new Addition(ret, term);
+    }
+
+    return ret;
+}
+
+std::deque<Expression*> getCommonFactors(std::deque<Expression*> left, std::deque<Expression*> right) {
+    std::deque<Expression*> commonFactors;
+
+    for (Expression* item : left)
+        for (Expression* compare : right)
+            if (*item == *compare) {
+                commonFactors.push_back(item);
+                right.erase(std::find(right.begin(), right.end(), compare));
+                break;
+            }
 
     return commonFactors;
 }

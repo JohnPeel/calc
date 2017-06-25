@@ -3,21 +3,17 @@
 
 #include "Expression.h"
 
-class Multiplication : public Expression {
-protected:
-    Expression* leftSide;
-    Expression* rightSide;
+class Multiplication : public BiOpExpression {
 public:
-    Multiplication(Expression*, Expression*);
+    Multiplication(Expression* left, Expression* right) : BiOpExpression(left, right) {};
     double getValue() override;
 
-    Expression* getLeftSide() override;
-    Expression* getRightSide() override;
-
-    std::vector<Expression*> getNumeratorFactors() override;
+    std::deque<Expression*> getNumeratorFactors() override;
 
     Expression* simplify() override;
+    bool needParenthesis() override;
     std::string getString() override;
+    std::string getOpString() override { return "*"; };
 };
 
 
