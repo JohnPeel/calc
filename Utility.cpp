@@ -1,6 +1,19 @@
 
 #include "Utility.h"
 #include "Prime.h"
+#include "ShuntingYard.h"
+
+Expression* strToExpr(std::string str) {
+    return ShuntingYard(str).process();
+}
+
+Expression* simplify(Expression* expr) {
+    return expr->simplify();
+}
+
+std::string simplify(std::string str) {
+    return strToExpr(str)->simplify()->getString();
+}
 
 Expression* multiplyFactors(std::deque<Expression*> list, bool simplify) {
     if (list.size() == 0)

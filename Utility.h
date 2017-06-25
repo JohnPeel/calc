@@ -10,6 +10,10 @@
 #include <sstream>
 #include <string>
 
+Expression* strToExpr(std::string str);
+Expression* simplify(Expression* expr);
+std::string simplify(std::string str);
+
 Expression* multiplyFactors(std::deque<Expression*> list, bool simplify = false);
 Expression* addTerms(std::deque<Expression*> list, bool simplify = false);
 std::deque<Expression*> getCommonFactors(std::deque<Expression*> left, std::deque<Expression*> right);

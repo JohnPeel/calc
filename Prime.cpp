@@ -23,9 +23,9 @@ bool isProbablePrime(uint64_t n) {
     if (sqrtn == round(sqrtn))
         return false;
 
-    int D = findD(n);
-    if (not lucasPP(n, D, 1, (1 - D) / 4))
-        return false;
+    // FIXME: lucasPP is still broken...
+    //if (not lucasPP(n))
+    //    return false;
 
     {}  // NOTE: Irrelevant, but keep it. (CLion syntax warning)
     return true;
@@ -63,41 +63,6 @@ void lucasSeq(int64_t& U, int64_t& V, uint64_t k, uint64_t n, int32_t P, int32_t
     }
 }
 
-bool lucasPP(uint64_t n, int32_t D, int32_t P, int32_t Q) {
-    assert(std::__gcd<int64_t>(n, D) == 1);
-    assert(jacobi(D, n) == -1);
-
-    int64_t U = 1, V = P;
-    uint64_t k = n - jacobi(D, n);
-
-    lucasSeq(U, V, k, n, P, Q, D);
-
-    if (U != 0)
-        return false;
-
-    int32_t s = 0;
-    while (k % 2 == 0) {
-        k /= 2;
-        s += 1;
-    }
-
-    lucasSeq(U, V, k, n, P, Q, D);
-
-    if ((U == 0) or (V == 0))
-        return true;
-
-    for (int32_t r = 1; r < s; r++) {
-        V = mod<int64_t>(pow_mod<int64_t>(V, 2, n) - 2 * pow_mod<int64_t>(Q, k, n), n);
-        k *= 2;
-
-        if (V == 0)
-            return true;
-    }
-
-    assert(k = n - D);
-
-    return false;
-}
 
 int32_t jacobi(int64_t a, uint64_t n) {
     if (n == 1)
@@ -142,13 +107,54 @@ int32_t jacobi(int64_t a, uint64_t n) {
         return jacobi(n, (uint64_t)a);
 }
 
-int32_t findD(int64_t n) {
+int32_t findD(uint64_t n) {
     int32_t D = 5;
     while (jacobi(D, n) != -1) {
         D += (D < 0) ? -2 : 2;
         D *= -1;
     }
     return D;
+}
+
+bool lucasPP(uint64_t n, int32_t D, int32_t P, int32_t Q) {
+    //assert(std::__gcd<int64_t>(n, D) == 1);
+    assert(jacobi(D, n) == -1);
+
+    int64_t U = 1, V = P;
+    uint64_t k = n - jacobi(D, n);
+
+    lucasSeq(U, V, k, n, P, Q, D);
+
+    if (U != 0)
+        return false;
+
+    int32_t s = 0;
+    while (k % 2 == 0) {
+        k /= 2;
+        s += 1;
+    }
+
+    lucasSeq(U, V, k, n, P, Q, D);
+
+    if ((U == 0) or (V == 0))
+        return true;
+
+    for (int32_t r = 1; r < s; r++) {
+        V = mod<int64_t>(pow_mod<int64_t>(V, 2, n) - 2 * pow_mod<int64_t>(Q, k, n), n);
+        k *= 2;
+
+        if (V == 0)
+            return true;
+    }
+
+    assert(k = n - D);
+
+    return false;
+}
+
+bool lucasPP(uint64_t n) {
+    int32_t D = findD(n);
+    return lucasPP(n, D, 1, (1 - D) / 4);
 }
 
 bool millerRabin(int64_t n, int64_t b) {
@@ -174,6 +180,10 @@ bool millerRabin(int64_t n, int64_t b) {
     }
 
     return false;
+}
+
+bool millerRabin(int64_t n) {
+    return millerRabin(n, 2);
 }
 
 int64_t _pollardRho(int64_t n, int64_t x, int64_t c) {
