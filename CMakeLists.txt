@@ -11,3 +11,5 @@ set(SOURCE_FILES Expression.cpp Expression.h Integer.cpp Integer.h Float.cpp Flo
 
 add_executable(calc calc.cpp ${SOURCE_FILES})
 add_executable(tests tests.cpp ${SOURCE_FILES})
+
+add_dependencies(tests catch)
