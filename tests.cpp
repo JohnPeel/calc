@@ -2,9 +2,9 @@
 #include "catch.hpp"
 
 #include "Prime.h"
-TEST_CASE("Prime", "[prime]") {
+TEST_CASE("Prime") {
     SECTION("Miller-Rabin primality test") {
-        SECTION("Miller-Rabin 5->99") {
+        SECTION("Miller-Rabin 5->97") {
             INFO("Checking Miller-Rabin on first 100 numbers.");
             for (int i = 5; i < 100; i += 6) {
                 INFO("Checking " << i);
@@ -36,33 +36,34 @@ TEST_CASE("Prime", "[prime]") {
         }
     }
 
-    SECTION("Strong Lucas pseudoprimes") {
-        /*SECTION("Lucas 5->99") {
+    SECTION("Lucas probable prime test") {
+        SECTION("Lucas 5->97") {
             INFO("Checking Lucas on first 100 numbers.");
-            for (int i = 5; i < 100; i += 6)
+            for (int i = 5; i < 100; i += 6) {
                 if (std::sqrt(i) != std::round(std::sqrt(i))) {
                     INFO("Checking " << i);
                     CHECK(lucasPP(i) == isProbablePrime(i));
-
+                }
+                if (std::sqrt(i + 2) != std::round(std::sqrt(i + 2))) {
                     INFO("Checking " << i + 2);
                     CHECK(lucasPP(i + 2) == isProbablePrime(i + 2));
                 }
-        }*/
+            }
 
-        INFO("Checking Strong lucas pseudoprimes");
-        for (int i : {5459, 5777, 10877, 16109, 18971}) {
-            INFO("Checking " << i);
-            CHECK(lucasPP(i));
-            CHECK_FALSE(isProbablePrime(i));
+        }
+
+        SECTION("Strong Lucas pseudoprimes") {
+            INFO("Checking Strong lucas pseudoprimes");
+            for (int i : {5459, 5777, 10877, 16109, 18971}) {
+                INFO("Checking " << i);
+                CHECK(lucasPP(i));
+                CHECK_FALSE(isProbablePrime(i));
+            }
         }
     }
 }
 
 #include "Utility.h"
-TEST_CASE("Utility", "[utility]") {
-    // Stub
-}
-
 #include "Expression.h"
 #include "Integer.h"
 #include "Float.h"
@@ -74,14 +75,27 @@ TEST_CASE("Utility", "[utility]") {
 #include "Division.h"
 #include "Exponentiation.h"
 #include "Logarithm.h"
-
 #include "Parser.h"
 #include "ShuntingYard.h"
-TEST_CASE("ShuntingYard", "[shuntingyard]") {
-    // TODO: Write this.
-}
 
 #define test(a, b) CHECK(simplify(a) == b);
+
+TEST_CASE("Classes") {
+    SECTION("Utility") {}
+    SECTION("Expression") {}
+    SECTION("Integer") {}
+    SECTION("Float") {}
+    SECTION("Variable") {}
+    SECTION("Method") {}
+    SECTION("Addition") {}
+    SECTION("Subtraction") {}
+    SECTION("Multiplication") {}
+    SECTION("Division") {}
+    SECTION("Exponentiation") {}
+    SECTION("Logarithm") {}
+    SECTION("Parser") {}
+    SECTION("ShuntingYard") {}
+}
 
 TEST_CASE("CAS") {
     SECTION("Factoring") {

@@ -6,11 +6,11 @@
 #include "Parser.h"
 #include "Expression.h"
 
-class ShuntingYard {
-private:
-    Parser parser;
+class ShuntingYard : public Parser {
 public:
     ShuntingYard(std::string data);
+
+    void Error(std::string) override;
     Expression* process();
 };
 

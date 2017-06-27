@@ -36,6 +36,16 @@ void Parser::reset() {
     token = tk_NULL;
 }
 
+void Parser::Expected(EParserToken token) {
+    if (peek() != token)
+        Error("Expected " + std::string(ParserTokenStr[token]));
+}
+
+void Parser::Expected(std::vector<EParserToken> tokens) {
+    for (EParserToken token : tokens)
+        Expected(token);
+}
+
 EParserToken Parser::nextToken() {
     token = tk_NULL;
     tokenPos = pos;

@@ -117,11 +117,7 @@ Expression* NthRoot::simplify() {
 
     if (leftSideInt) {
         int multiplicity = (int)leftSideInt->getValue();
-        std::map<Expression*, int, ExpressionComp> factors;
-
-        for (Expression* factor : rightSide->getFactors())
-            if (*factor != *one)
-                factors[factor]++;
+        std::map<Expression*, int, ExpressionComp> factors = dequeToFactorMap(rightSide->getFactors());
 
         std::deque<Expression*> terms;
         for (auto x : factors)

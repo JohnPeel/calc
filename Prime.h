@@ -23,7 +23,7 @@
  * @param n the number to be tested.
  * @return true if \a n is prime.
  */
-bool isProbablePrime(uint64_t n);
+bool isProbablePrime(int n);
 
 /**
  * Strong Lucas probable prime test.
@@ -33,7 +33,7 @@ bool isProbablePrime(uint64_t n);
  * @param n
  * @return
  */
-bool lucasPP(uint64_t n);
+bool lucasPP(int n);
 
 /**
  * Miller-Rabin primality test.
@@ -44,7 +44,7 @@ bool lucasPP(uint64_t n);
  * @param b Base
  * @return
  */
-bool millerRabin(int64_t n, int64_t b);
+bool millerRabin(int n, int b);
 
 /**
  * Base-2 millerRabin test.
@@ -54,7 +54,7 @@ bool millerRabin(int64_t n, int64_t b);
  * @param n Number to test
  * @return
  */
-bool millerRabin(int64_t n);
+bool millerRabin(int n);
 
 /**
  * Find a prime factor of \a n by using Pollard's rho algorithm.
@@ -64,7 +64,7 @@ bool millerRabin(int64_t n);
  * @param n
  * @return A prime factor of \a n.
  */
-int64_t pollardRho(int64_t n);
+int pollardRho(int n);
 
 /**
  * Finds all prime factors of \a n.

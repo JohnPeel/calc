@@ -6,17 +6,10 @@
 #include "Multiplication.h"
 #include "Addition.h"
 #include <deque>
+#include <map>
 #include <algorithm>
 #include <sstream>
 #include <string>
-
-Expression* strToExpr(std::string str);
-Expression* simplify(Expression* expr);
-std::string simplify(std::string str);
-
-Expression* multiplyFactors(std::deque<Expression*> list, bool simplify = false);
-Expression* addTerms(std::deque<Expression*> list, bool simplify = false);
-std::deque<Expression*> getCommonFactors(std::deque<Expression*> left, std::deque<Expression*> right);
 
 struct ExpressionComp {
     bool operator()(Expression* rhs, Expression* lhs) {
@@ -24,11 +17,43 @@ struct ExpressionComp {
     }
 };
 
+Expression* strToExpr(std::string str);
+Expression* simplify(Expression* expr);
+std::string simplify(std::string str);
+
+std::deque<Expression*> factorMapToDeque(std::map<Expression*, int, ExpressionComp> factorMap);
+std::map<Expression*, int, ExpressionComp> dequeToFactorMap(std::deque<Expression*> deque);
+
+Expression* multiplyFactors(std::deque<Expression*> list, bool simplify = false);
+Expression* addTerms(std::deque<Expression*> list, bool simplify = false);
+std::deque<Expression*> getCommonFactors(std::deque<Expression*> left, std::deque<Expression*> right);
+
 template <typename T>
 T strToT(std::string data) {
     T ret;
     std::istringstream(data) >> ret;
     return ret;
+}
+
+template <typename T>
+static T gcd(T a, T b) {
+    a *= (a < 0) ? -1 : 1;
+    b *= (b < 0) ? -1 : 1;
+
+    if (a == 0) return b;
+    if (b == 0) return a;
+
+    if (a < b)
+        std::swap(a, b);
+
+    int c = a % b;
+    while (c != 0) {
+        a = b;
+        b = c;
+        c = a % b;
+    }
+
+    return b;
 }
 
 template <typename T>

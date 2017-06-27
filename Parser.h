@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <string>
+#include <vector>
 
 enum EParserToken {
     tk_NULL = 0,
@@ -153,17 +154,23 @@ public:
 };
 
 class Parser {
-private:
+protected:
     std::string data;
     unsigned int pos, tokenPos;
     EParserToken token;
 public:
     Parser(std::string data);
     void reset();
+
+    virtual void Error(std::string) = 0;
+    void Expected(EParserToken);
+    void Expected(std::vector<EParserToken>);
+
     EParserToken nextToken();
     EParserToken nextTokenNoJunk();
     EParserToken peek();
     EParserToken peekNoJunk();
+
     Token getToken();
 };
 

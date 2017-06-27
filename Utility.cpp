@@ -15,9 +15,28 @@ std::string simplify(std::string str) {
     return strToExpr(str)->simplify()->getString();
 }
 
+std::deque<Expression*> factorMapToDeque(std::map<Expression*, int, ExpressionComp> factorMap) {
+    std::deque<Expression*> terms;
+    for (auto x : factorMap)
+        while (factorMap[x.first] > 0) {
+            terms.push_back(x.first);
+            factorMap[x.first]--;
+        }
+
+    return terms;
+}
+
+std::map<Expression*, int, ExpressionComp> dequeToFactorMap(std::deque<Expression*> deque) {
+    std::map<Expression*, int, ExpressionComp> factorMap;
+    for (Expression* factor : deque)
+        if (*factor != *one)
+            factorMap[factor]++;
+    return factorMap;
+}
+
 Expression* multiplyFactors(std::deque<Expression*> list, bool simplify) {
     if (list.size() == 0)
-        return new Integer(1);
+        return one;
 
     Expression* ret = (simplify) ? list.front()->simplify() : list.front();
     list.pop_front();

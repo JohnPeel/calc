@@ -5,32 +5,58 @@
 #include "Division.h"
 #include "Exponentiation.h"
 #include "Subtraction.h"
+#include "Logarithm.h"
 
 #include <stack>
 #include <iostream>
+#include <set>
+
+std::set<EParserToken> TwoSidedOps = {tk_op_Divide, tk_op_Minus, tk_op_Multiply, tk_op_Plus, tk_op_Power, tk_op_Rt, tk_op_Log};
 
 Expression* tokenToExp(Token tok, std::deque<Expression*>& stack) {
-    Expression* right = stack.back(); stack.pop_back();
-    Expression* left = stack.back(); stack.pop_back();
+    if (TwoSidedOps.find(tok.getToken()) != TwoSidedOps.end()) {
+        Expression *right = stack.back();
+        stack.pop_back();
+        Expression *left = stack.back();
+        stack.pop_back();
+
+        switch (tok.getToken()) {
+            case tk_op_Divide:
+                return new Division(left, right);
+            case tk_op_Minus:
+                return new Subtraction(left, right);
+            case tk_op_Multiply:
+                return new Multiplication(left, right);
+            case tk_op_Plus:
+                return new Addition(left, right);
+            case tk_op_Power:
+                return new Exponentiation(left, right);
+            case tk_op_Rt:
+                return new NthRoot(left, right);
+            case tk_op_Log:
+                return new Logarithm(left, right);
+
+            default:
+                throw "Unknown token!";
+        }
+    }
+
+    Expression *right = stack.back();
+    stack.pop_back();
 
     switch (tok.getToken()) {
-        case tk_op_Divide: return new Division(left, right);
-        case tk_op_Minus: return new Subtraction(left, right);
-        case tk_op_Multiply: return new Multiplication(left, right);
-        case tk_op_Plus: return new Addition(left, right);
-        case tk_op_Power: return new Exponentiation(left, right);
-        case tk_op_Rt: return new NthRoot(left, right);
-
-        case tk_Identifier:
         case tk_op_Ln:
-        case tk_op_Log:
+            return new LogNatural(right);
+
+        case tk_Identifier: // FIXME: Write methods!
         default:
-            throw "What the hell??";
+            throw "Unknown token!";
     }
 }
 
 void pushOp(Token token, std::deque<Expression *>& output, std::stack<Token>& opers) {
-    while ((opers.size() > 0) and ((opers.top().getPrecedence() > token.getPrecedence()) or ((token.getPrecedence() == opers.top().getPrecedence()) and (token.getAssoc() == assocLeft)))) {
+    while ((opers.size() > 0) and ((opers.top().getPrecedence() > token.getPrecedence()) or 
+            ((token.getPrecedence() == opers.top().getPrecedence()) and (token.getAssoc() == assocLeft)))) {
         output.push_back(tokenToExp(opers.top(), output));
         opers.pop();
     }
@@ -38,17 +64,21 @@ void pushOp(Token token, std::deque<Expression *>& output, std::stack<Token>& op
     opers.push(token);
 }
 
-ShuntingYard::ShuntingYard(std::string data): parser(data) {
+ShuntingYard::ShuntingYard(std::string data) : Parser(data) {
     // stub
 }
 
+void ShuntingYard::Error(std::string data) {
+    // TODO: Write error message!!
+}
+
 Expression* ShuntingYard::process() {
-    std::deque<Expression *> output;
+    std::deque<Expression*> output;
     std::stack<Token> opers;
 
     EParserToken lastToken = tk_NULL;
-    while (parser.nextTokenNoJunk() != tk_NULL) {
-        Token token = parser.getToken();
+    while (nextTokenNoJunk() != tk_NULL) {
+        Token token = getToken();
 
         switch (token.getToken()) {
             case tk_Identifier:
