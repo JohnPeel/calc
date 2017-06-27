@@ -12,6 +12,9 @@ addons:
       - g++-6
       - cmake
 
+before_install:
+  - git submodule update --init --recursive
+
 before_script:
   - sudo ln -s /usr/bin/gcc-6 /usr/local/bin/gcc
   - sudo ln -s /usr/bin/g++-6 /usr/local/bin/g++
