@@ -14,3 +14,5 @@ add_executable(calc calc.cpp $<TARGET_OBJECTS:library>)
 add_executable(tests tests.cpp $<TARGET_OBJECTS:library>)
 
 add_dependencies(tests catch)
+
+add_test(Tests ./tests)
