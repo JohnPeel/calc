@@ -17,10 +17,10 @@ before_script:
   - sudo ln -s /usr/bin/g++-6 /usr/local/bin/g++
   - export CC=/usr/bin/gcc-6
   - export CXX=/usr/bin/g++-6
+  - gcc -v && g++ -v && cmake --version
   - mkdir build
   - cd build
   - cmake ..
 
 script:
-  - gcc -v && g++ -v && cmake --version
-  - make
+  - make && make test
