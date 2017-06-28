@@ -28,7 +28,7 @@ double Variable::getValue() {
 }
 
 std::string Variable::getString() {
-    return name;
+    return (name == "ans") ? value->getString() : name;
 }
 
 bool Variable::find(std::string name, Expression*& foundVar) {
