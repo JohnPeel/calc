@@ -12,34 +12,34 @@ Expression *Logarithm::simplify() {
     Expression* leftSide = this->leftSide->simplify();
     Expression* rightSide = this->rightSide->simplify();
 
-    if (*rightSide == *one)
+    if (*leftSide == *one)
         return zero;
 
     if (*leftSide == *rightSide)
         return one;
 
-    std::map<Expression*, int, ExpressionComp> factorMap = dequeToFactorMap(rightSide->getFactors());
-    std::deque<Expression*> factors = leftSide->getFactors();
+    std::map<Expression*, int, ExpressionComp> leftFactorMap = dequeToFactorMap(leftSide->getFactors());
+    std::map<Expression*, int, ExpressionComp> rightFactorMap = dequeToFactorMap(rightSide->getFactors());
 
-    int count = factorMap[factors[0]];
-    for (Expression* factor : factors)
-        count = std::min(count, factorMap[factor]);
+    int count = (int)rightFactorMap.size();
+    for (auto& factor : rightFactorMap)
+        count = std::min(count, leftFactorMap[factor.first] / rightFactorMap[factor.first]);
 
     std::deque<Expression*> terms;
-
     if (count > 0) {
-        for (Expression *factor : factors)
-            factorMap[factor] -= count;
+        for (auto& factor : rightFactorMap)
+            leftFactorMap[factor.first] -= count * rightFactorMap[factor.first];
 
-        rightSide = multiplyFactors(factorMapToDeque(factorMap))->simplify();
+        leftSide = multiplyFactors(factorMapToDeque(leftFactorMap))->simplify();
     }
 
-    std::deque<Expression*> addFactors = rightSide->getNumeratorFactors();
+    std::deque<Expression*> addFactors = leftSide->getNumeratorFactors();
     for (Expression* term : addFactors)
-        terms.push_back(new Logarithm(leftSide, term));
-    std::deque<Expression*> subFactors = rightSide->getDenominatorFactors();
+        terms.push_back(new Logarithm(term, rightSide));
+
+    std::deque<Expression*> subFactors = leftSide->getDenominatorFactors();
     for (Expression* term : subFactors)
-        terms.push_back(new Multiplication(negOne, new Logarithm(leftSide, term)));
+        terms.push_back(new Multiplication(negOne, new Logarithm(term, rightSide)));
 
     if (count > 0)
         terms.push_back(new Integer(count));

@@ -78,7 +78,7 @@ TEST_CASE("Prime") {
 #include "Parser.h"
 #include "ShuntingYard.h"
 
-#define test(a, b) CHECK(simplify(a) == b);
+#define test(a, b) CHECK(simplify(a) == b)
 
 TEST_CASE("Classes") {
     SECTION("Utility") {}
@@ -145,6 +145,12 @@ TEST_CASE("CAS") {
     SECTION("Project Overview") {
         test("(e - 1) / ((e ^ 2) - 1)", "1 / (e + 1)");
         test("2 rt ((pi ^ 2) + 2pi + 1)", "pi + 1");
+        test("3 rt 8", "2");
+        test("4 rt 16", "2");
+        test("(6 / 2) rt (5 + 3)", "2");
+        test("8 log 2", "3");
+        test("(13 + 14) log (2 rt 9)", "3");
+        test("2 log 8", "2 log 8");
         test("2--3", "5");
         test("1.25", "1 + (1 / 4)");
         test("0.14285714285", "0.142857");

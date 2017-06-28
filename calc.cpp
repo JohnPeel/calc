@@ -1,9 +1,5 @@
 #include <iostream>
-#include <cassert>
-#include <iomanip>
 #include "ShuntingYard.h"
-#include "Integer.h"
-#include "Utility.h"
 
 using namespace std;
 
@@ -25,6 +21,7 @@ int main(int argc, char* argv[]) {
     InputParser input(argc, argv);
 
     // TODO: Write program.
+    cout << "Hello world!" << endl;
 
     return 0;
 };
