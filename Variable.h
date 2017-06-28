@@ -1,6 +1,7 @@
 #ifndef CALC_VARIABLE_H
 #define CALC_VARIABLE_H
 
+#define _USE_MATH_DEFINES
 #include "Expression.h"
 #include "Integer.h"
 #include "Float.h"

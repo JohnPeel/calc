@@ -42,24 +42,24 @@ Expression* Division::simplify() {
             allDen.erase(std::find(allDen.begin(), allDen.end(), item));
         }
 
-    if ((allDen.size() > 1) or ((allDen.size() == 1) and (*allDen[0] != *one))) {
+    if ((allDen.size() > 1) || ((allDen.size() == 1) && (*allDen[0] != *one))) {
         std::deque<Expression *> commonFactors = getCommonFactors(allNum, allDen);
 
         if (commonFactors.size() >= 1) {
             for (Expression *commonItem : commonFactors) {
                 for (Expression *item : allNum)
-                    if ((*item == *commonItem) or (*item == *one)) {
+                    if ((*item == *commonItem) || (*item == *one)) {
                         allNum.erase(std::find(allNum.begin(), allNum.end(), item));
                         break;
                     }
                 for (Expression *item : allDen)
-                    if ((*item == *commonItem) or (*item == *one)) {
+                    if ((*item == *commonItem) || (*item == *one)) {
                         allDen.erase(std::find(allDen.begin(), allDen.end(), item));
                         break;
                     }
             }
 
-            if ((allDen.size() == 0) or ((allDen.size() == 1) and (*allDen[0] == *one)))
+            if ((allDen.size() == 0) || ((allDen.size() == 1) && (*allDen[0] == *one)))
                 return multiplyFactors(allNum, true);
 
             if (allDen.size() > 0)

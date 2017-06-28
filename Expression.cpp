@@ -45,7 +45,7 @@ bool Expression::isNeg() {
     std::deque<Expression*> terms = getFactors();
     for (Expression* factor : terms)
         if (*factor == *negOne)
-            neg = not neg;
+            neg = !neg;
     return neg;
 }
 
@@ -63,7 +63,7 @@ bool Expression::operator<(Expression &rhs) {
 
 bool OpExpression::operator==(Expression& rhs) {
     OpExpression* rhsExpr = dynamic_cast<OpExpression*>(&rhs);
-    if (not rhsExpr)
+    if (!rhsExpr)
         return false;
 
     return *(getLeftSide()) == *(rhsExpr->getLeftSide());
@@ -87,8 +87,8 @@ std::string BiOpExpression::getString() {
 
 bool BiOpExpression::operator==(Expression& rhs) {
     BiOpExpression* rhsExpr = dynamic_cast<BiOpExpression*>(&rhs);
-    if (not rhsExpr)
+    if (!rhsExpr)
         return false;
 
-    return (getOpString() == rhsExpr->getOpString()) and (*(leftSide) == *(rhsExpr->leftSide)) and (*(rightSide) == *(rhsExpr->rightSide));
+    return (getOpString() == rhsExpr->getOpString()) && (*(leftSide) == *(rhsExpr->leftSide)) && (*(rightSide) == *(rhsExpr->rightSide));
 }

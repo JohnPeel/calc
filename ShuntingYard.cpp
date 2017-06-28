@@ -55,8 +55,8 @@ Expression* tokenToExp(Token tok, std::deque<Expression*>& stack) {
 }
 
 void pushOp(Token token, std::deque<Expression *>& output, std::stack<Token>& opers) {
-    while ((opers.size() > 0) and ((opers.top().getPrecedence() > token.getPrecedence()) or 
-            ((token.getPrecedence() == opers.top().getPrecedence()) and (token.getAssoc() == assocLeft)))) {
+    while ((opers.size() > 0) && ((opers.top().getPrecedence() > token.getPrecedence()) || 
+            ((token.getPrecedence() == opers.top().getPrecedence()) && (token.getAssoc() == assocLeft)))) {
         output.push_back(tokenToExp(opers.top(), output));
         opers.pop();
     }
@@ -82,7 +82,7 @@ Expression* ShuntingYard::process() {
 
         switch (token.getToken()) {
             case tk_Identifier:
-                if ((lastToken == tk_typ_Integer) or (lastToken == tk_typ_Float))
+                if ((lastToken == tk_typ_Integer) || (lastToken == tk_typ_Float))
                     pushOp(Token(tk_op_Multiply, 0, "*"), output, opers);
 
                 Expression* temp;
@@ -94,14 +94,14 @@ Expression* ShuntingYard::process() {
                     output.push_back(new Variable(token.getData(), NULL));
                 break;
             case tk_typ_Integer:
-                if ((lastToken == tk_typ_Integer) and (*(output.back()) == *negOne)) {
+                if ((lastToken == tk_typ_Integer) && (*(output.back()) == *negOne)) {
                     output.pop_back();
                     output.push_back(new Integer(strToT<int>("-" + token.getData())));
                 } else
                     output.push_back(new Integer(strToT<int>(token.getData())));
                 break;
             case tk_typ_Float:
-                if ((lastToken == tk_typ_Integer) and (*(output.back()) == *negOne)) {
+                if ((lastToken == tk_typ_Integer) && (*(output.back()) == *negOne)) {
                     output.pop_back();
                     output.push_back(new Float(strToT<float>("-" + token.getData())));
                 } else
@@ -111,7 +111,8 @@ Expression* ShuntingYard::process() {
                 switch (lastToken) {
                     case tk_NULL:
                     case tk_sym_ParenthesisOpen:
-                    case tk_op_Divide ... tk_op_Rt:
+					case tk_op_Divide: case tk_op_Ln: case tk_op_Log: case tk_op_Minus:
+					case tk_op_Multiply: case tk_op_Plus: case tk_op_Power: case tk_op_Rt:
                         token = Token(tk_typ_Integer, 0, "-1");
                         output.push_back(negOne);
                         break;
@@ -120,12 +121,12 @@ Expression* ShuntingYard::process() {
                         break;
                 }
                 break;
-            case tk_op_Divide ... tk_op_Log:
-            case tk_op_Multiply ... tk_op_Rt:
+			case tk_op_Divide: case tk_op_Ln: case tk_op_Log:
+			case tk_op_Multiply: case tk_op_Plus: case tk_op_Power: case tk_op_Rt:
                 pushOp(token, output, opers);
                 break;
             case tk_sym_ParenthesisOpen: case tk_sym_BracketOpen:
-                if ((lastToken == tk_sym_ParenthesisClose) or (lastToken == tk_typ_Integer) or (lastToken == tk_typ_Float))
+                if ((lastToken == tk_sym_ParenthesisClose) || (lastToken == tk_typ_Integer) || (lastToken == tk_typ_Float))
                     pushOp(Token(tk_op_Multiply, 0, "*"), output, opers);
                 opers.push(token);
                 break;

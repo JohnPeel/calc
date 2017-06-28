@@ -22,7 +22,7 @@ public:
     //virtual Expression* expand() { return this; };
     virtual Expression* simplify() { return this; };
 
-    virtual bool needParenthesis() { return (getNumeratorFactors().size() + getDenominatorFactors().size() > 1) or (getAdditiveTerms().size() > 1); };
+    virtual bool needParenthesis() { return (getNumeratorFactors().size() + getDenominatorFactors().size() > 1) || (getAdditiveTerms().size() > 1); };
     virtual std::string getString();
 
     virtual bool isNeg();
@@ -56,8 +56,8 @@ protected:
 public:
     BiOpExpression(Expression* left, Expression* right) : OpExpression(left), rightSide(right) {};
 
-    bool hasValue() override { return getLeftSide()->hasValue() and getRightSide()->hasValue(); };
-    bool hasExactValue() override { return getLeftSide()->hasExactValue() and getRightSide()->hasExactValue(); };
+    bool hasValue() override { return getLeftSide()->hasValue() && getRightSide()->hasValue(); };
+    bool hasExactValue() override { return getLeftSide()->hasExactValue() && getRightSide()->hasExactValue(); };
 
     bool needParenthesis() override { return true; };
     std::string getString() override;

@@ -50,7 +50,7 @@ EParserToken Parser::nextToken() {
     token = tk_NULL;
     tokenPos = pos;
 
-    if ((pos < 0) or (pos >= data.length()))
+    if (pos >= data.length())
         return tk_NULL;
 
     switch (data[pos]) {
@@ -58,43 +58,18 @@ EParserToken Parser::nextToken() {
             token = tk_NULL;
             break;
         case '\n': case '\r':
-            if ((data[pos] == '\r') and (data[pos + 1] == '\n'))
+            if ((data[pos] == '\r') && (data[pos + 1] == '\n'))
                 pos++;
             pos++;
             token = tk_NewLine;
             break;
-        case char(1) ... '\t': case '\v': case '\f': case char(14) ... char(32):
-            pos++;
-            while ((data[pos] >= char(1)) and (data[pos] <= char(32)) and ((data[pos] != '\n') or (data[pos] != '\r')))
-                pos++;
-            token = tk_WhiteSpace;
-            break;
-        case '.':
-        case '0' ... '9':
+        case '.': case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
             token = tk_typ_Integer;
-            while (((data[pos] >= '0') and (data[pos] <= '9')) or (data[pos] == '.')) {
+            while (((data[pos] >= '0') && (data[pos] <= '9')) || (data[pos] == '.')) {
                 if (data[pos] == '.')
                     token = tk_typ_Float;
                 pos++;
             }
-            break;
-        case 'a' ... 'z': case 'A' ... 'Z':
-            while (((data[pos] >= 'a') and (data[pos] <= 'z')) or ((data[pos] >= 'A') and (data[pos] <= 'Z')))
-                pos++;
-            token = tk_Identifier;
-
-            { // We need this block because of the variable below.
-                std::string ident = data.substr(tokenPos, pos - tokenPos);
-                std::transform(ident.begin(), ident.end(), ident.begin(), ::tolower);
-
-                if (ident == "rt")
-                    token = tk_op_Rt;
-                if (ident == "ln")
-                    token = tk_op_Ln;
-                if (ident == "log")
-                    token = tk_op_Log;
-            }
-
             break;
         case '=':
             pos++;
@@ -165,10 +140,31 @@ EParserToken Parser::nextToken() {
             pos++;
             token = tk_sym_ParenthesisClose;
             break;
-        default: // Unknown?
-            pos++;
-            token = tk_ERROR;
-            break;
+        default:
+            if ((data[pos] >= '\x01') && (data[pos] <= '\x32')) {
+                pos++;
+                while ((data[pos] >= char(1)) && (data[pos] <= char(32)) && ((data[pos] != '\n') || (data[pos] != '\r')))
+                    pos++;
+                token = tk_WhiteSpace;
+            } else if (((data[pos] >= 'a') && (data[pos] <= 'z')) || ((data[pos] >= 'A') && (data[pos] <= 'Z'))) {
+				while (((data[pos] >= 'a') && (data[pos] <= 'z')) || ((data[pos] >= 'A') && (data[pos] <= 'Z')))
+					pos++;
+				
+				token = tk_Identifier;
+
+				std::string ident = data.substr(tokenPos, pos - tokenPos);
+				std::transform(ident.begin(), ident.end(), ident.begin(), ::tolower);
+
+				if (ident == "rt")
+					token = tk_op_Rt;
+				if (ident == "ln")
+					token = tk_op_Ln;
+				if (ident == "log")
+					token = tk_op_Log;
+			} else {
+				pos++;
+				token = tk_ERROR;
+			}
     }
 
     return token;
@@ -176,7 +172,7 @@ EParserToken Parser::nextToken() {
 
 EParserToken Parser::nextTokenNoJunk() {
     EParserToken tok = nextToken();
-    while ((token == tk_NewLine) or (token == tk_WhiteSpace))
+    while ((token == tk_NewLine) || (token == tk_WhiteSpace))
         tok = nextToken();
     return tok;
 }

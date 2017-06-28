@@ -72,7 +72,7 @@ static T mul_mod(T a, T b, T m)
     if (b >= m) b = mod<T>(b, m);
     x = a;
     c = x * b / m;
-    return mod<T>((int64_t)(a * b - c * m), m);
+    return mod<T>(a * b - c * m, m);
 }
 
 template <typename T>

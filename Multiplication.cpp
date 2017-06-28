@@ -1,3 +1,4 @@
+#include <iterator>
 #include "Multiplication.h"
 #include "Integer.h"
 #include "Variable.h"
@@ -30,10 +31,10 @@ Expression* Multiplication::simplify() {
     Integer* leftInt = dynamic_cast<Integer*>(left);
     Integer* rightInt = dynamic_cast<Integer*>(right);
 
-    if ((*left == *i) and (*right == *i)) return negOne;
-    if (leftInt and rightInt) return new Integer((int)getValue());
-    if ((leftInt) and (*leftInt == *one)) return right;
-    if ((rightInt) and (*rightInt == *one)) return left;
+    if ((*left == *i) && (*right == *i)) return negOne;
+    if (leftInt && rightInt) return new Integer((int)getValue());
+    if ((leftInt) && (*leftInt == *one)) return right;
+    if ((rightInt) && (*rightInt == *one)) return left;
 
     std::deque<Expression*> terms = getNumeratorFactors();
 
@@ -49,7 +50,7 @@ Expression* Multiplication::simplify() {
                 if (termExp) {
                     Integer* termRight = dynamic_cast<Integer*>(termExp->getRightSide());
                     if (termRight)
-                        factorMap[termExp->getLeftSide()] += termRight->getValue();
+                        factorMap[termExp->getLeftSide()] += (int)termRight->getValue();
                     else
                         factorMap[term] += 1;
                 } else
@@ -74,7 +75,7 @@ Expression* Multiplication::simplify() {
         std::deque<Expression*> allTerms;
         for (auto& term : factorMap)
             if (*(term.first) != *one) {
-                if ((term.second > 1) and (dynamic_cast<Integer*>(term.first) == NULL))
+                if ((term.second > 1) && (dynamic_cast<Integer*>(term.first) == NULL))
                     allTerms.push_back(new Exponentiation(term.first, new Integer(term.second)));
                 else if (term.second != 0)
                     for (int i = 0; i < term.second; i++)
@@ -92,21 +93,21 @@ Expression* Multiplication::simplify() {
 
     if (terms.size() == 2) {
         Expression* outsideTerm = dynamic_cast<Integer*>(terms[0]);
-        if (not outsideTerm) outsideTerm = dynamic_cast<Integer*>(terms[1]);
-        if (not outsideTerm) outsideTerm = dynamic_cast<Variable*>(terms[0]);
-        if (not outsideTerm) outsideTerm = dynamic_cast<Variable*>(terms[1]);
+        if (!outsideTerm) outsideTerm = dynamic_cast<Integer*>(terms[1]);
+        if (!outsideTerm) outsideTerm = dynamic_cast<Variable*>(terms[0]);
+        if (!outsideTerm) outsideTerm = dynamic_cast<Variable*>(terms[1]);
 
         Addition* addTerm = dynamic_cast<Addition*>(terms[0]);
-        if (not addTerm) addTerm = dynamic_cast<Addition*>(terms[1]);
+        if (!addTerm) addTerm = dynamic_cast<Addition*>(terms[1]);
 
-        if (outsideTerm and addTerm) {
+        if (outsideTerm && addTerm) {
             std::deque<Expression*> termList;
             for (Expression* term : addTerm->getAdditiveTerms())
                 termList.push_back((new Multiplication(outsideTerm, term))->simplify());
 
-            if ((termList.size() > 1) and (termList[0]->isNeg()))
-                for (int i = 1; i < termList.size(); i++)
-                    if (not termList[i]->isNeg())
+            if ((termList.size() > 1) && (termList[0]->isNeg()))
+                for (size_t i = 1; i < termList.size(); i++)
+                    if (!termList[i]->isNeg())
                         std::swap(termList[0], termList[i]);
 
             terms.clear();
@@ -117,7 +118,7 @@ Expression* Multiplication::simplify() {
     std::deque<Expression*> denFactors = getDenominatorFactors();
 
     Expression* expr;
-    if ((denFactors.size() == 0) or ((denFactors.size() == 1) and (*(denFactors.front()) == *one))) {
+    if ((denFactors.size() == 0) || ((denFactors.size() == 1) && (*(denFactors.front()) == *one))) {
         if (terms.size() > 1)
             expr = multiplyFactors(terms);
         else
@@ -129,17 +130,17 @@ Expression* Multiplication::simplify() {
 }
 
 bool Multiplication::needParenthesis() {
-    if (leftSide->needParenthesis() and (not rightSide->needParenthesis()))
+    if (leftSide->needParenthesis() && (!rightSide->needParenthesis()))
         return false;
 
-    if (rightSide->needParenthesis() and (not leftSide->needParenthesis()))
+    if (rightSide->needParenthesis() && (!leftSide->needParenthesis()))
         return false;
 
-    if ((not leftSide->needParenthesis()) and (not rightSide->needParenthesis())) {
+    if ((!leftSide->needParenthesis()) && (!rightSide->needParenthesis())) {
         Variable* leftVar = dynamic_cast<Variable*>(leftSide);
         Variable* rightVar = dynamic_cast<Variable*>(rightSide);
 
-        return not ((leftVar and (not rightVar)) or (rightVar and (not leftVar)));
+        return !((leftVar == NULL) != (rightVar == NULL));
     }
 
     return Expression::needParenthesis();
@@ -151,7 +152,7 @@ std::string Multiplication::getString() {
 
     if (leftSide->needParenthesis()) {
         left = "(" + left + ")";
-        if (not rightSide->needParenthesis())
+        if (!rightSide->needParenthesis())
             return right + left;
     }
 
@@ -160,13 +161,13 @@ std::string Multiplication::getString() {
         return left + right;
     }
 
-    if ((not leftSide->needParenthesis()) and (not rightSide->needParenthesis())) {
+    if ((!leftSide->needParenthesis()) && (!rightSide->needParenthesis())) {
         Variable* leftVar = dynamic_cast<Variable*>(leftSide);
         Variable* rightVar = dynamic_cast<Variable*>(rightSide);
 
-        if (leftVar and (not rightVar))
+        if (leftVar && (!rightVar))
             return right + left;
-        if (rightVar and (not leftVar))
+        if (rightVar && (!leftVar))
             return left + right;
     }
 

@@ -109,10 +109,7 @@ Expression* NthRoot::simplify() {
 
         if (*rightSideInt == *negOne)
             if (leftSideInt)
-                if ((int)leftSideInt->getValue() % 2 == 0)
-                    return i;
-                else
-                    return negOne;
+                return (Expression *)(((int)leftSideInt->getValue() % 2 == 0) ? i : negOne);
     }
 
     if (leftSideInt) {
@@ -126,7 +123,7 @@ Expression* NthRoot::simplify() {
                     terms.push_back(x.first);
                     factors[x.first] -= multiplicity;
                 }
-            else if ((multiplicity % 2 == 0) and (x.second % 4 != 0)) {
+            else if ((multiplicity % 2 == 0) && (x.second % 4 != 0)) {
                 switch (x.second % 4) {
                     case 1:
                         terms.push_back(i);
@@ -156,11 +153,12 @@ Expression* NthRoot::simplify() {
 
             if (*insideExp == *one)
                 return outsideExp->simplify();
-            if (*insideExp == *negOne)
+            if (*insideExp == *negOne) {
                 if (multiplicity % 2 == 0)
                     return (new Multiplication(outsideExp, i))->simplify();
                 else
                     return (new Multiplication(negOne, outsideExp))->simplify();
+            }
 
             return (new Multiplication(outsideExp, new NthRoot(leftSide, insideExp)))->simplify();
         }

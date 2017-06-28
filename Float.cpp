@@ -5,6 +5,7 @@
 #include "Division.h"
 #include "Integer.h"
 #include "Addition.h"
+#include "Utility.h"
 
 double Float::getValue() {
     return value;
@@ -20,7 +21,7 @@ Expression* Float::simplify() {
 
     long precision = 1000000000;
 
-    int common = (int)std::__gcd<long long>((long long)std::round(fractional * precision), precision);
+    int common = (int)gcd<long>((long)std::round(fractional * precision), precision);
 
     if (common == 1)
         return this;

@@ -16,7 +16,7 @@ Variable::Variable(std::string name, Expression* value) {
 }
 
 bool Variable::hasValue() {
-    return (value != NULL) and value->hasValue();
+    return (value != NULL) && value->hasValue();
 }
 
 bool Variable::hasExactValue() {

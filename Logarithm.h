@@ -14,7 +14,7 @@ public:
 
     //bool needParenthesis() override { return (*leftSide != *e); };
     std::string getOpString() override { return "log"; };
-    std::string getString() {
+    std::string getString() override {
         std::string right = getRightSide()->getString();
         if (rightSide->needParenthesis())
             right = "(" + right + ")";

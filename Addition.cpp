@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <iterator>
 #include "Addition.h"
 #include "Subtraction.h"
 #include "Division.h"
@@ -37,12 +38,12 @@ std::deque<Expression *> Addition::getNumeratorFactors() {
 
     bool isSub = false;
     for (Expression* factor : rightFactors)
-        if (factor->hasValue() and (factor->getValue() == -1))
-            isSub = not isSub;
+        if (factor->hasValue() && (factor->getValue() == -1))
+            isSub = !isSub;
     if (isSub)
         newAdd = new Subtraction(leftSide, (new Multiplication(rightSide, negOne))->simplify());
 
-    if (leftSideInt and rightSideInt)
+    if (leftSideInt && rightSideInt)
         newAdd = newAdd->simplify(); // NOTE: This won't create an infinite loop because they are both Int.
     ret.push_back(newAdd);
 
@@ -65,7 +66,7 @@ Expression* Addition::simplify() {
     Integer* leftInt = dynamic_cast<Integer*>(leftSide->simplify());
     Integer* rightInt = dynamic_cast<Integer*>(rightSide->simplify());
 
-    if (leftInt and rightInt)
+    if (leftInt && rightInt)
         return new Integer((int)getValue());
 
     std::deque<Expression*> allTerms;
@@ -86,8 +87,8 @@ Expression* Addition::simplify() {
 
     if (terms.size() > 2)
         if (terms[0]->isNeg())
-            for (int i = 1; i < terms.size(); i++)
-                if (not terms[i]->isNeg())
+            for (size_t i = 1; i < terms.size(); i++)
+                if (!terms[i]->isNeg())
                     std::swap(terms[0], terms[i]);
 
     Expression* expr = addTerms(terms);
@@ -95,7 +96,7 @@ Expression* Addition::simplify() {
     std::deque<Expression*> numFactors = expr->getNumeratorFactors();
     std::deque<Expression*> denFactors = expr->getDenominatorFactors();
 
-    if ((denFactors.size() == 0) or ((denFactors.size() == 1) and (*(denFactors.front()) == *one))) {
+    if ((denFactors.size() == 0) || ((denFactors.size() == 1) && (*(denFactors.front()) == *one))) {
         if (numFactors.size() > 1)
             expr = multiplyFactors(numFactors)->simplify();
         else
@@ -116,9 +117,9 @@ Expression* Addition::simplify() {
 
                 bool cubeRt = true;
                 for (Expression* term : leftCubeRt->getNumeratorFactors())
-                    cubeRt = cubeRt and (dynamic_cast<NthRoot*>(term) == NULL);
+                    cubeRt = cubeRt && (dynamic_cast<NthRoot*>(term) == NULL);
                 for (Expression* term : rightCubeRt->getNumeratorFactors())
-                    cubeRt = cubeRt and (dynamic_cast<NthRoot*>(term) == NULL);
+                    cubeRt = cubeRt && (dynamic_cast<NthRoot*>(term) == NULL);
 
                 if (cubeRt) {
                     Expression* leftCRtSq = new Exponentiation(leftCubeRt, two);
@@ -133,7 +134,7 @@ Expression* Addition::simplify() {
                     return (new Multiplication(leftTerm, addTerms(rightTerms)))->simplify();
                 }
 
-                if (left->isNeg() xor right->isNeg()) {
+                if (left->isNeg() != right->isNeg()) {
                     if (left->isNeg())
                         left = new Multiplication(negOne, left);
                     if (right->isNeg())
@@ -144,9 +145,9 @@ Expression* Addition::simplify() {
 
                     bool sqrRt = true;
                     for (Expression* term : leftSqrRt->getNumeratorFactors())
-                        sqrRt = sqrRt and (dynamic_cast<NthRoot*>(term) == NULL);
+                        sqrRt = sqrRt && (dynamic_cast<NthRoot*>(term) == NULL);
                     for (Expression* term : rightSqrRt->getNumeratorFactors())
-                        sqrRt = sqrRt and (dynamic_cast<NthRoot*>(term) == NULL);
+                        sqrRt = sqrRt && (dynamic_cast<NthRoot*>(term) == NULL);
 
                     if (sqrRt) {
                         Expression* leftTerm = new Addition(leftSqrRt, rightSqrRt);
@@ -166,8 +167,8 @@ Expression* Addition::simplify() {
                     Multiplication* xMul = dynamic_cast<Multiplication*>(x);
                     Exponentiation* xExp = dynamic_cast<Exponentiation*>(x);
 
-                    if (xExp and xExp->getRightSide()->hasValue() and (xExp->getRightSide()->getValue() == 2)) {
-                        if (var and (*var != *(xExp->getLeftSide())))
+                    if (xExp && xExp->getRightSide()->hasValue() && (xExp->getRightSide()->getValue() == 2)) {
+                        if (var && (*var != *(xExp->getLeftSide())))
                             break;
                         var = xExp->getLeftSide();
                         a = one;
@@ -179,35 +180,35 @@ Expression* Addition::simplify() {
                         Exponentiation* leftExp = dynamic_cast<Exponentiation*>(xMul->getLeftSide());
                         Exponentiation* rightExp = dynamic_cast<Exponentiation*>(xMul->getRightSide());
 
-                        if (leftMul and (*(leftMul->getRightSide()) == *(leftMul->getLeftSide()))) {
-                            if (var and (*var != *(leftMul->getRightSide())))
+                        if (leftMul && (*(leftMul->getRightSide()) == *(leftMul->getLeftSide()))) {
+                            if (var && (*var != *(leftMul->getRightSide())))
                                 break;
                             var = leftMul->getRightSide();
                             a = xMul->getRightSide();
-                        } else if (rightMul and (*(rightMul->getRightSide()) == *(rightMul->getLeftSide()))) {
-                            if (var and (*var != *(rightMul->getRightSide())))
+                        } else if (rightMul && (*(rightMul->getRightSide()) == *(rightMul->getLeftSide()))) {
+                            if (var && (*var != *(rightMul->getRightSide())))
                                 break;
                             var = rightMul->getRightSide();
                             a = xMul->getLeftSide();
-                        }else if (rightExp and rightExp->getRightSide()->hasValue() and (rightExp->getRightSide()->getValue() == 2)) {
-                            if (var and (*var != *(rightExp->getLeftSide())))
+                        }else if (rightExp && rightExp->getRightSide()->hasValue() && (rightExp->getRightSide()->getValue() == 2)) {
+                            if (var && (*var != *(rightExp->getLeftSide())))
                                 break;
                             var = rightExp->getLeftSide();
                             a = xMul->getLeftSide();
-                        } else if (leftExp and leftExp->getRightSide()->hasValue() and (leftExp->getRightSide()->getValue() == 2)) {
-                            if (var and (*var != *(leftExp->getLeftSide())))
+                        } else if (leftExp && leftExp->getRightSide()->hasValue() && (leftExp->getRightSide()->getValue() == 2)) {
+                            if (var && (*var != *(leftExp->getLeftSide())))
                                 break;
                             var = leftExp->getLeftSide();
                             a = xMul->getRightSide();
-                        } else if ((not leftExp) and (not rightExp)) {
-                            if ((var and (*var == *left)) or (right->hasValue() and (not left->hasValue())))
+                        } else if ((!leftExp) && (!rightExp)) {
+                            if ((var && (*var == *left)) || (right->hasValue() && (!left->hasValue())))
                                 b = right;
-                            if ((var and (*var == *right)) or (left->hasValue() and (not right->hasValue())))
+                            if ((var && (*var == *right)) || (left->hasValue() && (!right->hasValue())))
                                 b = left;
                         } else
                             return expr;
                     } else if (xVar) {
-                        if (var and (*var != *xVar))
+                        if (var && (*var != *xVar))
                             break;
                         b = one;
                         var = x;
@@ -217,17 +218,17 @@ Expression* Addition::simplify() {
                         break;
                 }
 
-                if (a and b and c and var) {
+                if (a && b && c && var) {
                     Expression* negB = (new Multiplication(negOne, b))->simplify();
                     Expression* b2 = (new Exponentiation(b, two))->simplify();
                     Expression* twoA = (new Multiplication(two, a))->simplify();
                     Expression* ac = (new Multiplication(a, c))->simplify();
                     Expression* d = (new Subtraction(b2, new Multiplication(new Integer(4), ac)))->simplify();
 
-                    assert(d->hasValue() and dynamic_cast<Integer*>(d));
+                    assert(d->hasValue() && dynamic_cast<Integer*>(d));
                     Expression* sqrtD = (new NthRoot(two, d))->simplify();
 
-                    if ((d->getValue() > 0) and (not dynamic_cast<NthRoot*>(sqrtD))) {
+                    if ((d->getValue() > 0) && (!dynamic_cast<NthRoot*>(sqrtD))) {
                         Expression* firstTerm = (new Subtraction(var, new Division(new Subtraction(negB, sqrtD), twoA)))->simplify();
                         Expression* secondTerm = (new Subtraction(var, new Division(new Addition(negB, sqrtD), twoA)))->simplify();
                         return new Multiplication(firstTerm, secondTerm);
@@ -260,8 +261,8 @@ std::string Addition::getString() {
         Integer* termInt = dynamic_cast<Integer*>(term);
         Multiplication* termMul = dynamic_cast<Multiplication*>(term);
 
-        if ((termInt != NULL) or (termMul != NULL)) {
-            if (term->isNeg() and termInt) {
+        if ((termInt != NULL) || (termMul != NULL)) {
+            if (term->isNeg() && termInt) {
                 Expression* newTerm = (new Multiplication(negOne, term))->simplify();
                 term_str = newTerm->getString();
                 needPar = newTerm->needParenthesis();
@@ -278,9 +279,9 @@ std::string Addition::getString() {
                     term_str = leftTerm->getString();
                     needPar = leftTerm->needParenthesis();
                 } else if (term->isNeg()){
-                    if (leftTerm->isNeg() and dynamic_cast<Integer*>(leftTerm))
+                    if (leftTerm->isNeg() && dynamic_cast<Integer*>(leftTerm))
                         leftTerm = dynamic_cast<Integer*>((new Multiplication(negOne, leftTerm))->simplify());
-                    if (rightTerm->isNeg() and dynamic_cast<Integer*>(rightTerm))
+                    if (rightTerm->isNeg() && dynamic_cast<Integer*>(rightTerm))
                         rightTerm = dynamic_cast<Integer*>((new Multiplication(negOne, rightTerm))->simplify());
 
                     Expression* newTerm = new Multiplication(leftTerm, rightTerm);

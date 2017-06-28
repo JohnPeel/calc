@@ -7,7 +7,7 @@
 #include "Utility.h"
 
 bool isProbablePrime(int n) {
-    if ((n == 0) or (n == 1))
+    if ((n == 0) || (n == 1))
         return false;
 
     for (int known_prime : {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47})
@@ -16,14 +16,14 @@ bool isProbablePrime(int n) {
         else if (n % known_prime == 0)
             return false;
 
-    if ((not millerRabin(n, 2)) or (not millerRabin(n, 3)))
+    if ((!millerRabin(n, 2)) || (!millerRabin(n, 3)))
         return false;
 
     double sqrtn = std::sqrt(n);
     if (sqrtn == round(sqrtn))
         return false;
 
-    if (not lucasPP(n))
+    if (!lucasPP(n))
         return false;
 
     {}  // NOTE: Irrelevant, but keep it. (CLion syntax warning)
@@ -69,7 +69,7 @@ int jacobi(int a, int n) {
 
     a %= n; // Rule 2
 
-    if ((a == 0) or (a == 1))
+    if ((a == 0) || (a == 1))
         return a;
 
     // Rule 3
@@ -100,7 +100,7 @@ int jacobi(int a, int n) {
     assert(n % 2 != 0);
 
     // Rule 6
-    if ((a % 4 == 3) and (n % 4 == 3))
+    if ((a % 4 == 3) && (n % 4 == 3))
         return -jacobi(n, a);
     else
         return jacobi(n, a);
@@ -135,7 +135,7 @@ bool lucasPP(int n, int D, int P, int Q) {
 
     lucasSeq(U, V, k, n, P, Q, D);
 
-    if ((U == 0) or (V == 0))
+    if ((U == 0) || (V == 0))
         return true;
 
     for (int r = 1; r < s; r++) {
@@ -167,7 +167,7 @@ bool millerRabin(int n, int b) {
 
     int x = pow_mod(b, d, n);
 
-    if ((x == 1) or (x == n - 1))
+    if ((x == 1) || (x == n - 1))
          return true;
 
     for (int i = 0; i < r - 1; i++) {
@@ -216,7 +216,7 @@ int pollardRho(int n) {
         return 2;
 
     int factor = n;
-    while ((not isProbablePrime(n)) and (factor >= n))
+    while (!isProbablePrime(n) && (factor >= n))
         factor = _pollardRho(n, 2, 1);
 
     return factor;

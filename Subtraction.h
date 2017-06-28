@@ -15,7 +15,7 @@ public:
     Expression* getRightSide() override {
         Multiplication* right = dynamic_cast<Multiplication*>(rightSide);
 
-        if ((right) and (*(right->getLeftSide()) == *negOne))
+        if ((right) && (*(right->getLeftSide()) == *negOne))
             return right->getRightSide();
 
         return rightSide;
