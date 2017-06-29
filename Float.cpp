@@ -58,7 +58,7 @@ int getDecimalCount(double value) {
 }
 
 std::string Float::getString() {
-    char buffer[7]; //getDecimalCount maxes at 6, buffer for 7 to include null.
+    char buffer[(int)std::floor(log10(std::abs(std::floor(value)))) + 8]; // number, decimal and up to 7 after decimal.
     sprintf(buffer, "%#.*f",  getDecimalCount(value), value);
     return std::string(buffer);
 }
