@@ -57,20 +57,19 @@ Expression* ShuntingYard::tokenToExp(Token tok) {
     }
 
     if (tok.getToken() == tk_Method) {
-        Expression* expr;
-        if (!Method::find(tok.getData(), expr))
+        MethodProc method = NULL;
+        int paramCount = 0;
+        if (!Method::find(tok.getData(), paramCount, method))
             throw "It's impossible.";
-        Method* method = dynamic_cast<Method*>(expr);
 
         ExpressionList params;
-        int paramCount = method->getParamCount();
         for (int i = 0; i < paramCount; i++) {
             Expression* param = output.back();
             output.pop_back();
             params.push_front(param);
         }
 
-        return method->call(params);
+        return new Method(tok.getData(), params, method);
     }
 
     Error("Unknown token (" + tok.getData() + ")");
@@ -99,7 +98,7 @@ Expression* ShuntingYard::process() {
                     pushOp(Token(tk_op_Multiply, 0, "*"));
 
                 Expression* temp;
-                if (Method::find(token.getData(), temp))
+                if (Method::find(token.getData()))
                     pushOp(Token(tk_Method, token.getPos(), token.getData()));
                 else if (Variable::find(token.getData(), temp))
                     output.push_back(temp);

@@ -33,7 +33,7 @@ int main() {
 
                 if ((command != "quit") && (command != "q")) {
                     try {
-                        Expression *expr = strToExpr(data);//->simplify(); // FIXME: Re-enable auto-simplify
+                        Expression *expr = strToExpr(data)->simplify();
                         cout << expr->getString() << endl;
 
                         history.push_back(expr);

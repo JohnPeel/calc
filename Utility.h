@@ -27,6 +27,8 @@ Expression* multiplyFactors(ExpressionList list, bool simplify = false);
 Expression* addTerms(ExpressionList list, bool simplify = false);
 ExpressionList getCommonFactors(ExpressionList left, ExpressionList right);
 
+unsigned int richards(double const x0, unsigned long long& num, unsigned long long& den, double const error = 1e-10);
+
 template <typename T>
 T strToT(std::string data) {
     T ret;

@@ -1,4 +1,5 @@
 
+#include <cmath>
 #include "Utility.h"
 #include "Prime.h"
 #include "ShuntingYard.h"
@@ -91,4 +92,27 @@ ExpressionList getCommonFactors(ExpressionList left, ExpressionList right) {
             }
 
     return commonFactors;
+}
+
+unsigned int richards(double const x0, unsigned long long& num, unsigned long long& den, double const error) {
+    double g = std::abs(x0), x_abs = g;
+    unsigned long long a = 0, b = 1, c = 1, d = 0, s;
+    unsigned int iter = 0;
+
+    do {
+        s = (unsigned long long)std::floor(g);
+
+        num = a + (s * c);
+        den = b + (s * d);
+        a = c;
+        b = d;
+        c = num;
+        d = den;
+        g = 1.0 / (g - s);
+
+        if (std::abs((double)num / den - x_abs) < error)
+            return iter;
+    } while (++iter < 100);
+
+    return 0;
 }

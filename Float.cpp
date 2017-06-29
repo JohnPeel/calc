@@ -17,14 +17,8 @@ Float::Float(double value) {
 }
 
 Expression* Float::simplify() {
-    if (value < 0) {
-        Expression* expr = (new Float(-value))->simplify();
-
-        if (dynamic_cast<Float*>(expr) != NULL)
-            return this;
-
-        return (new Multiplication(negOne, expr))->simplify();
-    }
+    if (value < 0)
+        return (new Multiplication(negOne, (new Float(-value))->simplify()))->simplify();
 
     int wholeNumber = (int)std::floor(value);
     double fractional = value - wholeNumber;
@@ -36,16 +30,11 @@ Expression* Float::simplify() {
             return new Integer(wholeNumber);
     }
 
-    long long precision = (long long)pow(10, 6);
-    long long common = gcd((long long)std::round(fractional * precision), precision);
+    unsigned long long num = 0, den = 0;
+    if ((richards(fractional, num, den, 1e-6) > 0) && (num < INT_MAX) && (den < INT_MAX))
+        return (new Division(new Integer((int)num), new Integer((int)den)))->simplify();
 
-    if (common == 1)
-        return this;
-
-    int den = (int)(precision / common);
-    int num = (int)(std::round(fractional * precision) / common);
-
-    return new Division(new Integer(num), new Integer(den));
+    return new Float(fractional);
 }
 
 int getDecimalCount(double value) {
