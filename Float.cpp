@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <limits>
 #include "Float.h"
 #include "Integer.h"
 #include "Addition.h"
@@ -31,7 +32,7 @@ Expression* Float::simplify() {
     }
 
     unsigned long long num = 0, den = 0;
-    if ((richards(fractional, num, den, 1e-6) > 0) && (num < INT_MAX) && (den < INT_MAX))
+    if ((richards(fractional, num, den, 1e-6) > 0) && (num < std::numeric_limits<int>::max()) && (den < std::numeric_limits<int>::max()))
         return (new Division(new Integer((int)num), new Integer((int)den)))->simplify();
 
     return new Float(fractional);
