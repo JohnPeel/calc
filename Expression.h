@@ -24,6 +24,7 @@ public:
 
     virtual bool needParenthesis() { return (getNumeratorFactors().size() + getDenominatorFactors().size() > 1) || (getAdditiveTerms().size() > 1); };
     virtual std::string getString();
+    virtual std::string getTypeString() { return "Expression"; };
 
     virtual bool isNeg();
 
@@ -47,6 +48,8 @@ public:
 
     virtual Expression* getLeftSide() { return leftSide; };
 
+    std::string getTypeString() override { return "OpExpression"; };
+
     bool operator==(Expression& rhs) override;
 };
 
@@ -63,6 +66,8 @@ public:
     std::string getString() override;
 
     virtual Expression* getRightSide() { return rightSide; };
+
+    std::string getTypeString() override { return "BiOpExpression"; };
 
     bool operator==(Expression& rhs) override;
 };

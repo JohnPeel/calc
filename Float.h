@@ -14,6 +14,7 @@ public:
     Expression* simplify() override;
 
     std::string getString() override;
+    std::string getTypeString() override { return "Float"; };
 };
 
 #endif //CALC_FLOAT_H

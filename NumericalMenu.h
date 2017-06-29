@@ -1,26 +1,23 @@
 #ifndef CALC_NUMERICALMENU_H__
 #define CALC_NUMERICALMENU_H__
 
-#include <iostream>
 #include <string>
 #include <vector>
 
-using namespace std;
-
 class NumericalMenu {
 private:
-    vector<string> options;
-    string cancelText;
-    string errorText;
-    string prompt;
+    std::vector<std::string> options;
+    std::string cancelText;
+    std::string errorText;
+    std::string prompt;
     bool shouldRepeat;
     void printPrompt() const;
 public:
     NumericalMenu();
-    int addOption(string option);
-    void setCancelText(string cancelText);
-    void setErrorText(string errorText);
-    void setPrompt(string prompt);
+    int addOption(std::string option);
+    void setCancelText(std::string cancelText);
+    void setErrorText(std::string errorText);
+    void setPrompt(std::string prompt);
     void setRepeatPromptOnError(bool shouldRepeat);
     int run() const;
     int size() const;

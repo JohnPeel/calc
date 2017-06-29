@@ -19,22 +19,12 @@ std::string Integer::getString() {
     return std::to_string(value);
 }
 
-std::deque<Expression *> Integer::getNumeratorFactors() {
-    std::deque<Expression*> ret;
-
-    if (value == 0) {
-        ret.push_back(zero);
-        return ret;
-    }
-
-    if (value == 1) {
-        ret.push_back(one);
-        return ret;
-    }
-
+ExpressionList Integer::getNumeratorFactors() {
     std::vector<int> factors = getPrimeFactors(value);
-    for (int factor : factors)
-        ret.push_back(new Integer(factor));
 
-    return ret;
+    ExpressionMap map;
+    for (int factor : factors)
+        map[new Integer(factor)]++;
+
+    return factorMapToList(map);
 }

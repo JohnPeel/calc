@@ -1,18 +1,20 @@
 #include "Variable.h"
+#include "Float.h"
+
+#define _USE_MATH_DEFINES // NOTE: Do not delete! Needed by some compilers.
+#include <cmath>
 
 VariableList registeredVar;
-Variable* pi = new Variable("pi", new Float(M_PI));
-Variable* e = new Variable("e", new Float(M_E));
-Variable* i = new Variable("i", NULL);
+Expression* pi = new Variable("pi", new Float(M_PI));
+Expression* e = new Variable("e", new Float(M_E));
+Expression* i = new Variable("i", NULL);
 
-Variable::Variable(std::string name, Expression* value) {
+Variable::Variable(std::string name, Expression* value, bool registerThis) {
     this->name = name;
-    if (value)
-        this->value = value;
-    else
-        this->value = NULL;
+    this->value = value;
 
-    registeredVar.add(this);
+    if (registerThis)
+        registeredVar.add(this);
 }
 
 bool Variable::hasValue() {

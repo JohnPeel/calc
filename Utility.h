@@ -2,14 +2,10 @@
 #define CALC_UTILITY_H
 
 #include "Expression.h"
-#include "Integer.h"
-#include "Multiplication.h"
-#include "Addition.h"
 #include <deque>
 #include <map>
-#include <algorithm>
-#include <sstream>
 #include <string>
+#include <sstream>
 
 struct ExpressionComp {
     bool operator()(Expression* rhs, Expression* lhs) {
@@ -17,16 +13,19 @@ struct ExpressionComp {
     }
 };
 
+typedef std::map<Expression*, int, ExpressionComp> ExpressionMap;
+typedef std::deque<Expression*> ExpressionList;
+
 Expression* strToExpr(std::string str);
 Expression* simplify(Expression* expr);
 std::string simplify(std::string str);
 
-std::deque<Expression*> factorMapToDeque(std::map<Expression*, int, ExpressionComp> factorMap);
-std::map<Expression*, int, ExpressionComp> dequeToFactorMap(std::deque<Expression*> deque);
+ExpressionList factorMapToList(ExpressionMap factorMap);
+ExpressionMap listToFactorMap(ExpressionList deque);
 
-Expression* multiplyFactors(std::deque<Expression*> list, bool simplify = false);
-Expression* addTerms(std::deque<Expression*> list, bool simplify = false);
-std::deque<Expression*> getCommonFactors(std::deque<Expression*> left, std::deque<Expression*> right);
+Expression* multiplyFactors(ExpressionList list, bool simplify = false);
+Expression* addTerms(ExpressionList list, bool simplify = false);
+ExpressionList getCommonFactors(ExpressionList left, ExpressionList right);
 
 template <typename T>
 T strToT(std::string data) {
@@ -86,16 +85,6 @@ static T pow_mod(T a, T b, T m)
         a = mul_mod<T>(a, a, m);
     }
     return mod<T>(r, m);
-}
-
-template <typename T> bool PLessComp(T* a, T* b)
-{
-    return *a < *b;
-}
-
-template <typename T> bool PEqualComp(T* a, T* b)
-{
-    return *a == *b;
 }
 
 #endif //CALC_UTILITY_H

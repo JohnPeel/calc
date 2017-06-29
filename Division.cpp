@@ -1,15 +1,17 @@
+#include <algorithm>
 #include "Division.h"
-#include "Utility.h"
+#include "Multiplication.h"
+#include "Integer.h"
 
 double Division::getValue() {
     return leftSide->getValue() / rightSide->getValue();
 }
 
-std::deque<Expression*> Division::getNumeratorFactors() {
+ExpressionList Division::getNumeratorFactors() {
     return leftSide->getFactors();
 }
 
-std::deque<Expression*> Division::getDenominatorFactors() {
+ExpressionList Division::getDenominatorFactors() {
     return rightSide->getFactors();
 }
 
@@ -22,7 +24,7 @@ Expression* Division::simplify() {
     if (*right == *negOne)
         return new Multiplication(negOne, left);
 
-    std::deque<Expression*> allNum, allDen;
+    ExpressionList allNum, allDen;
     for (Expression* term : left->getNumeratorFactors())
         if (*term != *one)
             allNum.push_back(term);
@@ -43,7 +45,7 @@ Expression* Division::simplify() {
         }
 
     if ((allDen.size() > 1) || ((allDen.size() == 1) && (*allDen[0] != *one))) {
-        std::deque<Expression *> commonFactors = getCommonFactors(allNum, allDen);
+        ExpressionList commonFactors = getCommonFactors(allNum, allDen);
 
         if (commonFactors.size() >= 1) {
             for (Expression *commonItem : commonFactors) {

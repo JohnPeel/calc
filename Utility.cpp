@@ -2,6 +2,10 @@
 #include "Utility.h"
 #include "Prime.h"
 #include "ShuntingYard.h"
+#include "Integer.h"
+#include "Addition.h"
+#include "Multiplication.h"
+#include "Division.h"
 
 Expression* strToExpr(std::string str) {
     return ShuntingYard(str).process();
@@ -15,26 +19,31 @@ std::string simplify(std::string str) {
     return strToExpr(str)->simplify()->getString();
 }
 
-std::deque<Expression*> factorMapToDeque(std::map<Expression*, int, ExpressionComp> factorMap) {
-    std::deque<Expression*> terms;
+ExpressionList factorMapToList(ExpressionMap factorMap) {
+    ExpressionList terms;
     for (auto x : factorMap)
-        while (factorMap[x.first] > 0) {
-            terms.push_back(x.first);
-            factorMap[x.first]--;
+        while (factorMap[x.first] != 0) {
+            if (factorMap[x.first] > 0) {
+                terms.push_back(x.first);
+                factorMap[x.first]--;
+            } else {
+                terms.push_back(new Division(one, x.first));
+                factorMap[x.first]++;
+            }
         }
 
     return terms;
 }
 
-std::map<Expression*, int, ExpressionComp> dequeToFactorMap(std::deque<Expression*> deque) {
-    std::map<Expression*, int, ExpressionComp> factorMap;
+ExpressionMap listToFactorMap(ExpressionList deque) {
+    ExpressionMap factorMap;
     for (Expression* factor : deque)
         if (*factor != *one)
             factorMap[factor]++;
     return factorMap;
 }
 
-Expression* multiplyFactors(std::deque<Expression*> list, bool simplify) {
+Expression* multiplyFactors(ExpressionList list, bool simplify) {
     if (list.size() == 0)
         return one;
 
@@ -52,7 +61,7 @@ Expression* multiplyFactors(std::deque<Expression*> list, bool simplify) {
     return ret;
 }
 
-Expression* addTerms(std::deque<Expression*> list, bool simplify) {
+Expression* addTerms(ExpressionList list, bool simplify) {
     if (list.size() == 0)
         return new Integer(0);
 
@@ -70,8 +79,8 @@ Expression* addTerms(std::deque<Expression*> list, bool simplify) {
     return ret;
 }
 
-std::deque<Expression*> getCommonFactors(std::deque<Expression*> left, std::deque<Expression*> right) {
-    std::deque<Expression*> commonFactors;
+ExpressionList getCommonFactors(ExpressionList left, ExpressionList right) {
+    ExpressionList commonFactors;
 
     for (Expression* item : left)
         for (Expression* compare : right)

@@ -1,13 +1,8 @@
 #ifndef CALC_VARIABLE_H
 #define CALC_VARIABLE_H
 
-#define _USE_MATH_DEFINES
 #include "Expression.h"
-#include "Integer.h"
-#include "Float.h"
 #include <map>
-#include <string>
-#include <cmath>
 #include <algorithm>
 
 class Variable : public Expression {
@@ -15,12 +10,13 @@ protected:
     std::string name;
     Expression* value;
 public:
-    Variable(std::string, Expression*);
+    Variable(std::string, Expression*, bool = true);
     double getValue() override;
     bool hasValue() override;
     bool hasExactValue() override;
 
     std::string getString() override;
+    std::string getTypeString() override { return "Variable"; };
 
     static bool find(std::string name, Expression*& foundVar);
 
@@ -35,8 +31,8 @@ public:
     bool find(std::string name, Expression*& foundVar);
 };
 
-extern Variable* pi;
-extern Variable* e;
-extern Variable* i;
+extern Expression* pi;
+extern Expression* e;
+extern Expression* i;
 
 #endif //CALC_VARIABLE_H

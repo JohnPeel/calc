@@ -1,37 +1,35 @@
-#include "Expression.h"
-#include "Integer.h"
 #include "Utility.h"
-#include "Division.h"
+#include "Integer.h"
+#include "Variable.h"
+#include "Exponentiation.h"
 
 double Expression::getValue() {
     throw "Base class method called.";
 }
 
-std::deque<Expression*> Expression::getNumeratorFactors() {
-    std::deque<Expression*> dq;
+ExpressionList Expression::getNumeratorFactors() {
+    ExpressionList dq;
     dq.push_back(this);
     return dq;
 }
 
-std::deque<Expression*> Expression::getDenominatorFactors() {
-    std::deque<Expression*> dq;
+ExpressionList Expression::getDenominatorFactors() {
+    ExpressionList dq;
     return dq;
 }
 
-std::deque<Expression*> Expression::getFactors() {
-    std::deque<Expression*> ret;
-    std::deque<Expression*> num = getNumeratorFactors();
-    std::deque<Expression*> den = getDenominatorFactors();
+ExpressionList Expression::getFactors() {
+    ExpressionList ret = getNumeratorFactors();
+    ExpressionList den = getDenominatorFactors();
 
-    for (Expression* exp : num)
-        ret.push_back(exp);
     for (Expression* exp : den)
-        ret.push_back(new Division(one, exp));
+        ret.push_back(new Exponentiation(exp, negOne));
+
     return ret;
 }
 
-std::deque<Expression*> Expression::getAdditiveTerms() {
-    std::deque<Expression*> dq;
+ExpressionList Expression::getAdditiveTerms() {
+    ExpressionList dq;
     dq.push_back(this);
     return dq;
 }
@@ -42,7 +40,7 @@ std::string Expression::getString() {
 
 bool Expression::isNeg() {
     bool neg = false;
-    std::deque<Expression*> terms = getFactors();
+    ExpressionList terms = getFactors();
     for (Expression* factor : terms)
         if (*factor == *negOne)
             neg = !neg;

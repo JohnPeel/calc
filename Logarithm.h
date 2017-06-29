@@ -1,7 +1,6 @@
 #ifndef CALC_LOGARITHM_H
 #define CALC_LOGARITHM_H
 
-#include "Expression.h"
 #include "Variable.h"
 
 class Logarithm : public BiOpExpression {
@@ -24,12 +23,14 @@ public:
         else
             return OpExpression::getString() + " " + right;
     }
+    std::string getTypeString() override { return "Logarithm"; };
 };
 
 class LogNatural : public Logarithm {
 public:
     LogNatural(Expression* right) : Logarithm(e, right) {};
     std::string getOpString() override { return "ln"; }
+    std::string getTypeString() override { return "Natural Log"; };
 };
 
 

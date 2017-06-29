@@ -1,8 +1,9 @@
 #include <bitset>
 #include <cmath>
-#include <iostream>
 #include <utility>
 #include <cassert>
+#include <ctime>
+#include <algorithm>
 #include "Prime.h"
 #include "Utility.h"
 
@@ -228,6 +229,11 @@ std::vector<int> getPrimeFactors(int n) {
     if (n < 0) {
         ret.push_back(-1);
         n *= -1;
+    }
+
+    if ((n == 0) || (n == 1)) {
+        ret.push_back(n);
+        return ret;
     }
 
     int m = 1;

@@ -1,5 +1,6 @@
+#include <set>
 #include "ShuntingYard.h"
-#include "Utility.h"
+#include "Float.h"
 #include "Variable.h"
 #include "Method.h"
 #include "Division.h"
@@ -7,18 +8,23 @@
 #include "Subtraction.h"
 #include "Logarithm.h"
 
-#include <stack>
-#include <iostream>
-#include <set>
-
 std::set<EParserToken> TwoSidedOps = {tk_op_Divide, tk_op_Minus, tk_op_Multiply, tk_op_Plus, tk_op_Power, tk_op_Rt, tk_op_Log};
+std::set<EParserToken> OneSidedOps = {tk_op_Ln};
 
-Expression* tokenToExp(Token tok, std::deque<Expression*>& stack) {
+ShuntingYard::ShuntingYard(std::string data) : Parser(data) {
+    // stub
+}
+
+void ShuntingYard::Error(std::string data) {
+    throw "Parsing Error: " + data;
+}
+
+Expression* ShuntingYard::tokenToExp(Token tok) {
     if (TwoSidedOps.find(tok.getToken()) != TwoSidedOps.end()) {
-        Expression *right = stack.back();
-        stack.pop_back();
-        Expression *left = stack.back();
-        stack.pop_back();
+        Expression *right = output.back();
+        output.pop_back();
+        Expression *left = output.back();
+        output.pop_back();
 
         switch (tok.getToken()) {
             case tk_op_Divide:
@@ -35,46 +41,53 @@ Expression* tokenToExp(Token tok, std::deque<Expression*>& stack) {
                 return new NthRoot(left, right);
             case tk_op_Log:
                 return new Logarithm(left, right);
-
-            default:
-                throw "Unknown token!";
+            default: ;
         }
     }
 
-    Expression *right = stack.back();
-    stack.pop_back();
+    if (OneSidedOps.find(tok.getToken()) != OneSidedOps.end()) {
+        Expression *right = output.back();
+        output.pop_back();
 
-    switch (tok.getToken()) {
-        case tk_op_Ln:
-            return new LogNatural(right);
-
-        case tk_Identifier: // FIXME: Write methods!
-        default:
-            throw "Unknown token!";
+        switch (tok.getToken()) {
+            case tk_op_Ln:
+                return new LogNatural(right);
+            default: ;
+        }
     }
+
+    if (tok.getToken() == tk_Method) {
+        Expression* expr;
+        if (!Method::find(tok.getData(), expr))
+            throw "It's impossible.";
+        Method* method = dynamic_cast<Method*>(expr);
+
+        ExpressionList params;
+        int paramCount = method->getParamCount();
+        for (int i = 0; i < paramCount; i++) {
+            Expression* param = output.back();
+            output.pop_back();
+            params.push_front(param);
+        }
+
+        return method->call(params);
+    }
+
+    Error("Unknown token (" + tok.getData() + ")");
+    return NULL; // Error throws an exception, need this to suppress warning.
 }
 
-void pushOp(Token token, std::deque<Expression *>& output, std::stack<Token>& opers) {
-    while ((opers.size() > 0) && ((opers.top().getPrecedence() > token.getPrecedence()) || 
-            ((token.getPrecedence() == opers.top().getPrecedence()) && (token.getAssoc() == assocLeft)))) {
-        output.push_back(tokenToExp(opers.top(), output));
+void ShuntingYard::pushOp(Token token) {
+    while ((opers.size() > 0) && ((opers.top().getPrecedence() > token.getPrecedence()) ||
+                                  ((token.getPrecedence() == opers.top().getPrecedence()) && (token.getAssoc() == assocLeft)))) {
+        output.push_back(tokenToExp(opers.top()));
         opers.pop();
     }
 
     opers.push(token);
 }
 
-ShuntingYard::ShuntingYard(std::string data) : Parser(data) {
-    // stub
-}
-
-void ShuntingYard::Error(std::string data) {
-    // TODO: Write error message!!
-}
-
 Expression* ShuntingYard::process() {
-    std::deque<Expression*> output;
-    std::stack<Token> opers;
 
     EParserToken lastToken = tk_NULL;
     while (nextTokenNoJunk() != tk_NULL) {
@@ -83,11 +96,11 @@ Expression* ShuntingYard::process() {
         switch (token.getToken()) {
             case tk_Identifier:
                 if ((lastToken == tk_typ_Integer) || (lastToken == tk_typ_Float))
-                    pushOp(Token(tk_op_Multiply, 0, "*"), output, opers);
+                    pushOp(Token(tk_op_Multiply, 0, "*"));
 
                 Expression* temp;
                 if (Method::find(token.getData(), temp))
-                    opers.push(token);
+                    pushOp(Token(tk_Method, token.getPos(), token.getData()));
                 else if (Variable::find(token.getData(), temp))
                     output.push_back(temp);
                 else
@@ -117,29 +130,29 @@ Expression* ShuntingYard::process() {
                         output.push_back(negOne);
                         break;
                     default:
-                        pushOp(token, output, opers);
+                        pushOp(token);
                         break;
                 }
                 break;
 			case tk_op_Divide: case tk_op_Ln: case tk_op_Log:
 			case tk_op_Multiply: case tk_op_Plus: case tk_op_Power: case tk_op_Rt:
-                pushOp(token, output, opers);
+                pushOp(token);
                 break;
             case tk_sym_ParenthesisOpen: case tk_sym_BracketOpen:
                 if ((lastToken == tk_sym_ParenthesisClose) || (lastToken == tk_typ_Integer) || (lastToken == tk_typ_Float))
-                    pushOp(Token(tk_op_Multiply, 0, "*"), output, opers);
+                    pushOp(Token(tk_op_Multiply, 0, "*"));
                 opers.push(token);
                 break;
             case tk_sym_ParenthesisClose:
                 while (opers.top().getToken() != tk_sym_ParenthesisOpen) {
-                    output.push_back(tokenToExp(opers.top(), output));
+                    output.push_back(tokenToExp(opers.top()));
                     opers.pop();
                 }
                 opers.pop();
                 break;
             case tk_sym_BracketClose:
                 while (opers.top().getToken() != tk_sym_BracketOpen) {
-                    output.push_back(tokenToExp(opers.top(), output));
+                    output.push_back(tokenToExp(opers.top()));
                     opers.pop();
                 }
                 opers.pop();
@@ -152,16 +165,12 @@ Expression* ShuntingYard::process() {
     }
 
     while (opers.size() > 0) {
-        output.push_back(tokenToExp(opers.top(), output));
+        output.push_back(tokenToExp(opers.top()));
         opers.pop();
     }
 
     if (output.size() > 1) {
-        std::cout << "---------------------------------------------------------------" << std::endl;
-        std::cout << "Something is wrong... (" << output.size() << ")" << std::endl;
-        for (Expression* expr : output)
-            std::cout << "\"" << expr->getString() << "\" ";
-        std::cout << std::endl << std::endl << "---------------------------------------------------------------" << std::endl;
+        Error("Something was not right...");
     }
 
     return output.front();

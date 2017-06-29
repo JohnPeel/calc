@@ -1,5 +1,104 @@
 #include "Parser.h"
 
+const char* ParserTokenStr[] = {
+        "NULL",
+        "ERROR",
+        "Identifier",
+        "Method",
+        "WhiteSpace",
+        "NewLine",
+
+        "Equal",
+        "GreaterThan",
+        "GreaterThanOrEqual",
+        "LessThan",
+        "LessThanOrEqual",
+        "NotEqual",
+
+        "Divide",
+        "Ln",
+        "Log"
+                "Minus",
+        "Multiply",
+        "Plus",
+        "Power",
+        "Root",
+
+        "BracketOpen",
+        "BracketClose",
+        "ParenthesisClose",
+        "ParenthesisOpen",
+
+        "Float",
+        "Integer"
+};
+
+EOperatorAssociative OperatorAssociative[] = {
+        assocNone, //tk_NULL,
+        assocNone, //tk_ERROR,
+        assocNone, //tk_Identifier,
+        assocRight, //tk_Method,
+        assocNone, //tk_WhiteSpace,
+        assocNone, //tk_NewLine,
+
+        assocLeft, //tk_cmp_Equal,
+        assocLeft, //tk_cmp_GreaterThan,
+        assocLeft, //tk_cmp_GreaterThanOrEqual,
+        assocLeft, //tk_cmp_LessThan,
+        assocLeft, //tk_cmp_LessThanOrEqual,
+        assocLeft, //tk_cmp_NotEqual,
+
+        assocLeft, //tk_op_Divide,
+        assocRight, //tk_op_Ln
+        assocRight, //tk_op_Log
+        assocLeft, //tk_op_Minus,
+        assocLeft, //tk_op_Multiply,
+        assocLeft, //tk_op_Plus,
+        assocRight, //tk_op_Power,
+        assocRight, //tk_op_Rt,
+
+        assocNone, //tk_sym_BracketOpen,
+        assocNone, //tk_sym_BracketClose,
+        assocNone, //tk_sym_ParenthesisClose,
+        assocNone, //tk_sym_ParenthesisOpen,
+
+        assocNone, //tk_typ_Float,
+        assocNone  //tk_typ_Integer
+};
+
+unsigned char OperatorPrecedence[] = {
+        0, //tk_NULL,
+        0, //tk_ERROR,
+        5, //tk_Identifier, // Characters
+        5, //tk_Method,
+        0, //tk_WhiteSpace,
+        0, //tk_NewLine,
+
+        0, //tk_cmp_Equal,
+        0, //tk_cmp_GreaterThan,
+        0, //tk_cmp_GreaterThanOrEqual,
+        0, //tk_cmp_LessThan,
+        0, //tk_cmp_LessThanOrEqual,
+        0, //tk_cmp_NotEqual,
+
+        3, //tk_op_Divide,
+        4, //tk_op_Ln
+        4, //tk_op_Log
+        2, //tk_op_Minus,
+        3, //tk_op_Multiply,
+        2, //tk_op_Plus,
+        4, //tk_op_Power,
+        4, //tk_op_Rt,
+
+        1, //tk_sym_BracketOpen,
+        0, //tk_sym_BracketClose,
+        0, //tk_sym_ParenthesisClose,
+        1, //tk_sym_ParenthesisOpen,
+
+        0, //tk_typ_Float,
+        0  //tk_typ_Integer
+};
+
 Token::Token(EParserToken token, unsigned int pos, std::string data) {
     this->token = token;
     this->pos = pos;

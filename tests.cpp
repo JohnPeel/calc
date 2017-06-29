@@ -64,35 +64,42 @@ TEST_CASE("Prime") {
 }
 
 #include "Utility.h"
-#include "Expression.h"
-#include "Integer.h"
-#include "Float.h"
-#include "Variable.h"
-#include "Method.h"
-#include "Addition.h"
-#include "Subtraction.h"
-#include "Multiplication.h"
-#include "Division.h"
-#include "Exponentiation.h"
-#include "Logarithm.h"
-#include "Parser.h"
 #include "ShuntingYard.h"
 
 #define test(a, b) CHECK(simplify(a) == b)
 
+#define eval(a) strToExpr(a)->getString()
+#define eval_type(a) strToExpr(a)->getTypeString()
+#define eval_simplify(a) strToExpr(a)->simplify()->getString()
+
+inline void testExpr(std::string expr, std::string typ, std::string parsedStr, std::string simplifiedStr) {
+    CHECK(eval_type(expr) == typ);
+    CHECK(eval(expr) == parsedStr);
+    CHECK(eval_simplify(expr) == simplifiedStr);
+}
+inline void testExpr(std::string expr, std::string typ) { testExpr(expr, typ, expr, expr); }
+inline void testExpr(std::string expr, std::string typ, std::string simplifiedStr) { testExpr(expr, typ, expr, simplifiedStr); }
+
+
 TEST_CASE("Classes") {
     SECTION("Utility") {}
     SECTION("Expression") {}
-    SECTION("Integer") {}
-    SECTION("Float") {}
-    SECTION("Variable") {}
+    SECTION("Integer") { testExpr("1", "Integer"); }
+    SECTION("Float") { testExpr("0.1", "Float", "0.1", "1 / 10"); }
+    SECTION("Variable") { testExpr("x", "Variable"); }
     SECTION("Method") {}
-    SECTION("Addition") {}
-    SECTION("Subtraction") {}
-    SECTION("Multiplication") {}
-    SECTION("Division") {}
-    SECTION("Exponentiation") {}
-    SECTION("Logarithm") {}
+    SECTION("Addition") { testExpr("1 + 2", "Addition", "3"); }
+    SECTION("Subtraction") { testExpr("2 - 1", "Subtraction", "1"); }
+    SECTION("Multiplication") { testExpr("2 * x", "Multiplication", "2x", "2x"); }
+    SECTION("Division") { testExpr("2 / 2", "Division", "1"); }
+    SECTION("Exponentiation") {
+        testExpr("x ^ 2", "Exponentiation");
+        testExpr("2 rt x", "NthRoot");
+    }
+    SECTION("Logarithm") {
+        testExpr("2 log x", "Logarithm");
+        testExpr("ln x", "Natural Log");
+    }
     SECTION("Parser") {}
     SECTION("ShuntingYard") {}
 }
@@ -117,7 +124,7 @@ TEST_CASE("CAS") {
         SECTION("Difference of Squares") {
             test("((x ^ 2) - 4) / (x - 2)", "x + 2");
             test("(x ^ 2) - 4", "(x + 2)(x - 2)");
-            test("(x ^ 4) - 16", "(((x ^ 2) + 4)(x + 2))(x - 2)");
+            test("(x ^ 4) - 16", "((x ^ 2) + 4)(x + 2)(x - 2)");
         }
 
         SECTION("Quadratic") {
@@ -135,12 +142,13 @@ TEST_CASE("CAS") {
         test("2 rt (-4)", "2i");
         test("(2 rt (-4))(2 rt (-4))", "-4");
         test("i * (3i + 2)", "2i - 3");
+        test("3 rt (-27)", "-3");
+        test("4 rt (-16)", "2(4 rt (-1))");
     }
 
     SECTION("Distribution") {
         test("2(3 + 2x)", "6 + 4x");
     }
-
 
     SECTION("Project Overview") {
         test("(e - 1) / ((e ^ 2) - 1)", "1 / (e + 1)");
@@ -155,6 +163,8 @@ TEST_CASE("CAS") {
         test("1.25", "1 + (1 / 4)");
         test("0.14285714285", "0.142857");
         test("0.5", "1 / 2");
+        test("-0.5", "(-1) / 2");
         test("1.0", "1");
+        test("-1.0", "-1");
     }
 }

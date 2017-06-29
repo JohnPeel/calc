@@ -6,7 +6,6 @@
  */
 
 #include <vector>
-#include <ctime>
 
 /**
  * @brief Determines if \a n is a prime number.

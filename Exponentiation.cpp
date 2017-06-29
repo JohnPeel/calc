@@ -1,20 +1,18 @@
 #include "Exponentiation.h"
 #include "Integer.h"
-#include "Utility.h"
+#include "Multiplication.h"
 #include "Division.h"
 #include "Variable.h"
 #include <cmath>
-#include <map>
-#include <iostream>
 
 double Exponentiation::getValue() {
     return std::pow(leftSide->getValue(), rightSide->getValue());
 }
 
-std::deque<Expression*> Exponentiation::getNumeratorFactors() {
-    std::deque<Expression*> ret;
+ExpressionList Exponentiation::getNumeratorFactors() {
+    ExpressionList ret;
 
-    std::deque<Expression*> terms = rightSide->getAdditiveTerms();
+    ExpressionList terms = rightSide->getAdditiveTerms();
     for (Expression* term : terms) {
         Integer* termInt = dynamic_cast<Integer*>(term);
 
@@ -29,10 +27,10 @@ std::deque<Expression*> Exponentiation::getNumeratorFactors() {
     return ret;
 }
 
-std::deque<Expression*> Exponentiation::getDenominatorFactors() {
-    std::deque<Expression*> ret;
+ExpressionList Exponentiation::getDenominatorFactors() {
+    ExpressionList ret;
 
-    std::deque<Expression*> terms = rightSide->getAdditiveTerms();
+    ExpressionList terms = rightSide->getAdditiveTerms();
     for (Expression* term : terms) {
         Integer* termInt = dynamic_cast<Integer*>(term);
 
@@ -69,8 +67,8 @@ double NthRoot::getValue() {
     return std::pow(rightSide->getValue(), 1 / leftSide->getValue());
 }
 
-std::deque<Expression *> NthRoot::getNumeratorFactors() {
-    std::deque<Expression*> ret;
+ExpressionList NthRoot::getNumeratorFactors() {
+    ExpressionList ret;
     if (leftSide->hasValue()) {
         if (leftSide->getValue() > 0)
             ret.push_back(this);
@@ -81,8 +79,8 @@ std::deque<Expression *> NthRoot::getNumeratorFactors() {
     return ret;
 }
 
-std::deque<Expression*> NthRoot::getDenominatorFactors() {
-    std::deque<Expression*> ret;
+ExpressionList NthRoot::getDenominatorFactors() {
+    ExpressionList ret;
     if (leftSide->hasValue())
         if (leftSide->getValue() < 0)
             ret.push_back(this);
@@ -103,41 +101,28 @@ Expression* NthRoot::simplify() {
     Integer* leftSideInt = dynamic_cast<Integer*>(leftSide);
     Integer* rightSideInt = dynamic_cast<Integer*>(rightSide);
 
-    if (rightSideInt) {
-        if (*rightSideInt == *one)
-            return one;
-
-        if (*rightSideInt == *negOne)
-            if (leftSideInt)
-                return (Expression *)(((int)leftSideInt->getValue() % 2 == 0) ? i : negOne);
-    }
+    if ((rightSideInt) && (*rightSideInt == *one))
+        return one;
 
     if (leftSideInt) {
         int multiplicity = (int)leftSideInt->getValue();
-        std::map<Expression*, int, ExpressionComp> factors = dequeToFactorMap(rightSide->getFactors());
+        ExpressionMap factors = listToFactorMap(rightSide->getFactors());
 
-        std::deque<Expression*> terms;
+        ExpressionList terms;
         for (auto x : factors)
-            if (*x.first != *negOne)
-                while (factors[x.first] >= multiplicity) {
-                    terms.push_back(x.first);
-                    factors[x.first] -= multiplicity;
-                }
-            else if ((multiplicity % 2 == 0) && (x.second % 4 != 0)) {
-                switch (x.second % 4) {
-                    case 1:
-                        terms.push_back(i);
-                        break;
-                    case 2:
-                        terms.push_back(negOne);
-                        break;
-                    case 3:
-                        terms.push_back(negOne);
-                        terms.push_back(i);
-                        break;
-                }
-                factors[x.first] = 0;
+            while (factors[x.first] >= multiplicity) {
+                terms.push_back(x.first);
+                factors[x.first] -= multiplicity;
             }
+
+        if ((factors[negOne] % 2 == 1) && ((multiplicity % 2 == 1) || (multiplicity == 2))) {
+            if (multiplicity == 2)
+                terms.push_back(i);
+            else
+                terms.push_back(negOne);
+
+            factors.erase(negOne);
+        }
 
         Expression* outsideExp = multiplyFactors(terms)->simplify();
         if (*outsideExp != *one) {
@@ -153,12 +138,6 @@ Expression* NthRoot::simplify() {
 
             if (*insideExp == *one)
                 return outsideExp->simplify();
-            if (*insideExp == *negOne) {
-                if (multiplicity % 2 == 0)
-                    return (new Multiplication(outsideExp, i))->simplify();
-                else
-                    return (new Multiplication(negOne, outsideExp))->simplify();
-            }
 
             return (new Multiplication(outsideExp, new NthRoot(leftSide, insideExp)))->simplify();
         }

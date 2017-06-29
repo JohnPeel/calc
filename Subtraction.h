@@ -1,9 +1,8 @@
 #ifndef CALC_SUBTRACTION_H
 #define CALC_SUBTRACTION_H
 
-#include "Expression.h"
-#include "Addition.h"
 #include "Integer.h"
+#include "Addition.h"
 #include "Multiplication.h"
 
 class Subtraction : public Addition {
@@ -19,7 +18,9 @@ public:
             return right->getRightSide();
 
         return rightSide;
-    };
+    }
+
+    std::string getTypeString() override { return "Subtraction"; };
 };
 
 #endif //CALC_SUBTRACTION_H
