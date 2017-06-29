@@ -1,6 +1,7 @@
 #include <cmath>
 #include <algorithm>
 #include <sstream>
+#include <iomanip>
 #include "Float.h"
 #include "Integer.h"
 #include "Addition.h"
@@ -58,7 +59,8 @@ int getDecimalCount(double value) {
 }
 
 std::string Float::getString() {
-    char buffer[(int)std::floor(log10(std::abs(std::floor(value)))) + 8]; // number, decimal and up to 7 after decimal.
-    sprintf(buffer, "%#.*f",  getDecimalCount(value), value);
-    return std::string(buffer);
+    std::ostringstream ss;
+    ss.precision(getDecimalCount(value));
+    ss << value;
+    return ss.str();
 }
