@@ -3,6 +3,8 @@ sudo: require
 language: c++
 
 matrix:
+  allow_failures:
+    - os: osx
   include:
     - compiler: gcc
       addons: {apt: {sources: [ubuntu-toolchain-r-test], packages: [g++-6]}}
