@@ -7,6 +7,8 @@
 #include "Addition.h"
 #include "Multiplication.h"
 #include "Division.h"
+#include "Variable.h"
+#include "Exponentiation.h"
 
 Expression* strToExpr(std::string str) {
     return ShuntingYard(str).process();
@@ -18,6 +20,40 @@ Expression* simplify(Expression* expr) {
 
 std::string simplify(std::string str) {
     return strToExpr(str)->simplify()->getString();
+}
+
+void normalizeFactorMap(ExpressionMap& factorMap) {
+    factorMap[one] = 0;
+    factorMap[i] %= 4;
+    switch (factorMap[i]) {
+        case 2:
+            factorMap[negOne]++;
+            factorMap.erase(factorMap.find(i));
+            break;
+        case 3:
+            factorMap[negOne]++;
+            factorMap[i] = 1;
+            break;
+        default:
+            break;
+    }
+    factorMap[negOne] %= 2;
+
+    for (auto& factor : factorMap)
+        if ((factor.second != 0) && (factor.second != 1)) {
+            factorMap[(new Exponentiation(factor.first, new Integer(factor.second)))->simplify()] += 1;
+            factor.second = 0;
+        }
+
+    auto it = factorMap.begin();
+    while (it != factorMap.end()) {
+        if (it->second == 0) {
+            auto term = factorMap.find(it->first);
+            it++;
+            factorMap.erase(term);
+        } else
+            it++;
+    }
 }
 
 ExpressionList factorMapToList(ExpressionMap factorMap) {

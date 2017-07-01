@@ -6,20 +6,20 @@
 #include "Division.h"
 #include "Exponentiation.h"
 
-MethodList registeredMethod;
+MethodList registeredMethods;
 
 class initMethods {
 public:
     initMethods() {
-        registeredMethod.add("simplify", 1, [](ExpressionList params) -> Expression* {
+        registeredMethods.add("simplify", 1, [](ExpressionList params) -> Expression* {
             return params[0]->simplify();
         });
 
-        registeredMethod.add("factor", 1, [](ExpressionList params) -> Expression* {
+        registeredMethods.add("factor", 1, [](ExpressionList params) -> Expression* {
             return multiplyFactors(params[0]->getFactors());
         });
 
-        registeredMethod.add("type", 1, [](ExpressionList params) -> Expression* {
+        registeredMethods.add("type", 1, [](ExpressionList params) -> Expression* {
             return new Variable(params[0]->getTypeString(), NULL, false);
         });
 
@@ -57,13 +57,13 @@ Expression* Method::simplify() {
 }
 
 bool Method::find(std::string name, int& paramCount, MethodProc& method) {
-    return registeredMethod.find(name, paramCount, method);
+    return registeredMethods.find(name, paramCount, method);
 }
 
 bool Method::find(std::string name) {
     int paramCount;
     MethodProc method;
-    return registeredMethod.find(name, paramCount, method);
+    return registeredMethods.find(name, paramCount, method);
 }
 
 void MethodList::add(std::string name, int paramCount, MethodProc method) {

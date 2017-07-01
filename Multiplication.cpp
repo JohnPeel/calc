@@ -1,3 +1,4 @@
+#include <cmath>
 #include "Multiplication.h"
 #include "Integer.h"
 #include "Variable.h"
@@ -35,42 +36,20 @@ Expression* Multiplication::simplify() {
     if ((rightInt) && (*rightInt == *one)) return left;
 
     ExpressionList terms = getNumeratorFactors();
-
     if (terms.size() > 1) {
         ExpressionMap factorMap = listToFactorMap(getNumeratorFactors());
 
-        factorMap[one] = 0;
-        factorMap[i] %= 4;
-        switch (factorMap[i]) {
-            case 2:
-                factorMap[negOne] += 1;
-                factorMap.erase(i);
-                break;
-            case 3:
-                factorMap[negOne] += 1;
-                factorMap[i] = 1;
-                break;
-            default:
-                break;
-        }
-        factorMap[negOne] %= 2;
-
-        ExpressionList intTerms;
+        int intTerm = 1;
         for (auto& term : factorMap)
-                if (term.second != 0) {
-                    if (dynamic_cast<Integer *>(term.first) != NULL) {
-                        intTerms.push_back(new Exponentiation(term.first, new Integer(term.second)));
-                        factorMap.erase(term.first);
-                    } else if (term.second > 1) {
-                        factorMap[new Exponentiation(term.first, new Integer(term.second))] = 1;
-                        factorMap.erase(term.first);
-                    }
+                if (dynamic_cast<Integer *>(term.first) != NULL) {
+                    intTerm *= (int)std::pow(term.first->getValue(), term.second);
+                    term.second = 0;
                 }
 
-        Expression* intTerm = multiplyFactors(intTerms)->simplify();
-        if (*intTerm != *one)
-            factorMap[intTerm] = 1;
+        if (intTerm != 1)
+            factorMap[new Integer(intTerm)] = 1;
 
+        normalizeFactorMap(factorMap);
         terms = factorMapToList(factorMap);
     }
 
@@ -138,7 +117,7 @@ std::string Multiplication::getString() {
             if (*(factor.first) != *one) {
                 if (factor.second == 1)
                     ret += "(" + factor.first->getString() + ")";
-                else if (factor.second > 1)
+                else if (factor.second != 0)
                     ret += "(" + (new Exponentiation(factor.first, new Integer(factor.second)))->getString() + ")";
             }
 
@@ -147,6 +126,18 @@ std::string Multiplication::getString() {
 
     std::string left = getLeftSide()->getString();
     std::string right = getRightSide()->getString();
+
+    if (*leftSide == *negOne) {
+        if (rightSide->needParenthesis())
+            right = "(" + right + ")";
+        return "-" + right;
+    }
+
+    if (*rightSide == *negOne)  {
+        if (leftSide->needParenthesis())
+            left = "(" + left + ")";
+        return "-" + left;
+    }
 
     if (leftSide->needParenthesis()) {
         left = "(" + left + ")";

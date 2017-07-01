@@ -33,9 +33,9 @@ public:
 };
 
 class MethodList {
-protected:
-    std::map<std::string, std::pair<int, MethodProc>> map;
 public:
+    std::map<std::string, std::pair<int, MethodProc>> map;
+
     void add(std::string name, int paramCount, MethodProc method);
     bool find(std::string name, int& paramCount, MethodProc& foundMethod);
 
@@ -45,5 +45,7 @@ public:
         return (find(rhs, paramCount, method)) ? method : NULL;
     }
 };
+
+extern MethodList registeredMethods;
 
 #endif //CALC_METHOD_H

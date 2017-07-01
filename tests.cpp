@@ -128,10 +128,10 @@ TEST_CASE("CAS") {
         }
 
         SECTION("Quadratic") {
-            test("-(x ^ 2) + 4x - 4", "(x - 2) ^ 2");
+            test("-(x ^ 2) + 4x - 4", "-((x - 2) ^ 2)");
             test("(x ^ 2) + 4x + 4", "(x + 2) ^ 2");
             test("(x ^ 2) - 4x + 4", "(x - 2) ^ 2");
-            test("(x ^ 2) + 5x + 6", "(x + 3)(x + 2)");
+            test("(x ^ 2) + 5x + 6", "(x + 2)(x + 3)");
             test("(x ^ 2) - 5x + 6", "(x - 2)(x - 3)");
             test("(x ^ 2) + x - 6", "(x + 3)(x - 2)");
             test("(x ^ 2) - x - 6", "(x + 2)(x - 3)");
@@ -147,7 +147,7 @@ TEST_CASE("CAS") {
     }
 
     SECTION("Distribution") {
-        test("2(3 + 2x)", "6 + 4x");
+        test("2(3 + 2x)", "4x + 6");
     }
 
     SECTION("Project Overview") {

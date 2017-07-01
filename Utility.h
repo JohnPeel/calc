@@ -20,8 +20,15 @@ Expression* strToExpr(std::string str);
 Expression* simplify(Expression* expr);
 std::string simplify(std::string str);
 
+void normalizeFactorMap(ExpressionMap& factorMap);
 ExpressionList factorMapToList(ExpressionMap factorMap);
 ExpressionMap listToFactorMap(ExpressionList deque);
+
+template <typename T>
+bool exprToTypedExpression(Expression* expr, T*& typedExpr) {
+    typedExpr = dynamic_cast<T*>(expr);
+    return typedExpr != NULL;
+}
 
 Expression* multiplyFactors(ExpressionList list, bool simplify = false);
 Expression* addTerms(ExpressionList list, bool simplify = false);
