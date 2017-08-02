@@ -50,14 +50,33 @@ Expression* Exponentiation::simplify() {
 
     Integer* leftSideInt = dynamic_cast<Integer*>(leftSide);
     Integer* rightSideInt = dynamic_cast<Integer*>(rightSide);
+    if (leftSideInt && *leftSideInt == *one)
+        return one;
+
     if (rightSideInt) {
-        if (rightSideInt->getValue() == 0)
+        if (*rightSideInt == *zero)
             return one;
-        if (rightSideInt->getValue() == 1)
+        if (*rightSideInt == *one)
             return leftSide;
+        if (*rightSideInt == *negOne)
+            return new Division(one, leftSide);
 
         if (leftSideInt)
-            return multiplyFactors(getNumeratorFactors())->simplify();
+            return multiplyFactors(getFactors())->simplify();
+    }
+
+    Division* rightSideDiv = dynamic_cast<Division*>(rightSide);
+    if (rightSideDiv) {
+        Expression* newLeftSide = new NthRoot(multiplyFactors(rightSideDiv->getDenominatorFactors()), rightSide);
+        Expression* newRightSide = multiplyFactors(rightSideDiv->getNumeratorFactors());
+        return (new Exponentiation(newLeftSide, newRightSide))->simplify();
+    }
+
+    ExpressionList terms = rightSide->getAdditiveTerms();
+    if (terms.size() > 1) {
+        for (Expression*& term : terms)
+            term = new Exponentiation(leftSide, term);
+        return multiplyFactors(terms);
     }
 
     return new Exponentiation(leftSide, rightSide);
@@ -105,7 +124,7 @@ Expression* NthRoot::simplify() {
         return one;
 
     if (leftSideInt) {
-        int multiplicity = (int)leftSideInt->getValue();
+        int multiplicity = abs((int)leftSideInt->getValue());
         ExpressionMap factors = listToFactorMap(rightSide->getFactors());
 
         ExpressionList terms;
@@ -135,6 +154,9 @@ Expression* NthRoot::simplify() {
                 }
 
             Expression* insideExp = multiplyFactors(terms)->simplify();
+
+            if (leftSideInt->getValue() < 0)
+                outsideExp = new Division(one, outsideExp);
 
             if (*insideExp == *one)
                 return outsideExp->simplify();

@@ -11,16 +11,46 @@ double Addition::getValue() {
     return leftSide->getValue() + rightSide->getValue();
 }
 
+ExpressionList Addition::getDenominatorFactors() {
+    ExpressionList terms = getAdditiveTerms();
+    ExpressionList prevTerm = terms.front()->getDenominatorFactors();
+    ExpressionList newTerm = prevTerm;
+    ExpressionList common;
+    terms.pop_front();
+
+    for (Expression* term : terms) {
+        ExpressionList nextTerm = term->getDenominatorFactors();
+        ExpressionList commonTerms = getCommonFactors(prevTerm, nextTerm);
+
+        prevTerm = nextTerm;
+        newTerm.insert(newTerm.end(), nextTerm.begin(), nextTerm.end());
+        common.insert(common.end(), commonTerms.begin(), commonTerms.end());
+    }
+
+    Expression* term = (new Division(multiplyFactors(newTerm), multiplyFactors(common)))->simplify();
+    ExpressionList ret;
+    if (*term != *one)
+        ret.push_front(term);
+    return ret;
+}
+
 ExpressionList Addition::getNumeratorFactors() {
-    Expression* leftSide = this->leftSide;
-    Expression* rightSide = this->rightSide;
+    ExpressionList terms = getAdditiveTerms();
+    ExpressionList commonNum = terms.front()->getNumeratorFactors();
+    ExpressionList commonDen = terms.front()->getDenominatorFactors();
+    Expression* outsideDen = multiplyFactors(commonDen);
+    terms.pop_front();
+
+    for (Expression* term : terms) {
+        commonNum = getCommonFactors(commonNum, term->getNumeratorFactors());
+        ExpressionList termDen = term->getDenominatorFactors();
+        commonDen = getCommonFactors(commonDen, termDen);
+        termDen.push_front(outsideDen);
+        outsideDen = new Division(multiplyFactors(termDen), multiplyFactors(commonDen));
+    }
 
     ExpressionMap ret;
-    ExpressionList leftFactors = leftSide->getFactors();
-    ExpressionList rightFactors = rightSide->getFactors();
-    ExpressionList commonFactors = getCommonFactors(leftFactors, rightFactors);
-
-    Expression* commonFactor = multiplyFactors(commonFactors)->simplify();
+    Expression* commonFactor = (new Division(multiplyFactors(commonNum), outsideDen))->simplify();
     ret[commonFactor] = 1;
 
     Expression* newAdd;
@@ -31,7 +61,7 @@ ExpressionList Addition::getNumeratorFactors() {
     } else
         newAdd = new Addition(leftSide, rightSide);
 
-    rightFactors = rightSide->getFactors();
+    ExpressionList rightFactors = rightSide->getFactors();
     bool isSub = false;
     for (Expression* factor : rightFactors)
         if (*factor == *negOne)
@@ -43,7 +73,7 @@ ExpressionList Addition::getNumeratorFactors() {
     if ((dynamic_cast<Integer*>(leftSide) != NULL) && (dynamic_cast<Integer*>(rightSide) != NULL))
         newAdd = newAdd->simplify(); // NOTE: This won't create an infinite loop because they are both Int.
 
-    ExpressionList terms = newAdd->getAdditiveTerms();
+    terms = newAdd->getAdditiveTerms();
     if (terms.size() > 1) {
         bool nope = false;
         std::map<Expression*, std::map<int, double>, ExpressionComp> varMap;
@@ -81,7 +111,7 @@ ExpressionList Addition::getNumeratorFactors() {
                 }
             }
 
-            if (nope)
+            if (nope || var == NULL)
                 break;
 
             if (varMap[var].find(currentDegree) != varMap[var].end())
@@ -113,7 +143,7 @@ ExpressionList Addition::getNumeratorFactors() {
                     return map[0] + (newMap[0] * x);
                 };
 
-                if (degreeCount > 1)
+                if (degreeCount > 1) {
                     for (;;) {
                         int oldDegree = degreeCount;
                         int p = (int)map[0];
@@ -123,14 +153,16 @@ ExpressionList Addition::getNumeratorFactors() {
                             for (int qfactor : getPrimeFactors(q)) {
                                 std::map<int, double> newMap;
                                 if (syntheticDivision((1.0 * pfactor) / qfactor, newMap) == 0) {
-                                    ret[(new Subtraction(var.first, new Division(new Integer(pfactor), new Integer(qfactor))))->simplify()]++;
+                                    ret[(new Subtraction(var.first, new Division(new Integer(pfactor),
+                                                                                 new Integer(qfactor))))->simplify()]++;
                                     map = newMap;
                                     degreeCount--;
                                 }
 
                                 newMap.clear();
                                 if (syntheticDivision((-1.0 * pfactor) / qfactor, newMap) == 0) {
-                                    ret[(new Subtraction(var.first, new Division(new Integer(-pfactor), new Integer(qfactor))))->simplify()]++;
+                                    ret[(new Subtraction(var.first, new Division(new Integer(-pfactor),
+                                                                                 new Integer(qfactor))))->simplify()]++;
                                     map = newMap;
                                     degreeCount--;
                                 }
@@ -140,13 +172,15 @@ ExpressionList Addition::getNumeratorFactors() {
                             break; // No factors found.
                     }
 
-                ExpressionList newTerms;
-                for (int i = map.end()->first; i >= 0; i--)
-                    if (map[i] != 0)
-                        newTerms.push_back((new Multiplication(new Integer((int)map[i]),
-                                                               new Exponentiation(var.first, new Integer(i))))->simplify());
+                    ExpressionList newTerms;
+                    for (int i = map.end()->first; i >= 0; i--)
+                        if (map[i] != 0)
+                            newTerms.push_back((new Multiplication(new Integer((int)map[i]),
+                                                                   new Exponentiation(var.first,
+                                                                                      new Integer(i))))->simplify());
 
-                ret[addTerms(newTerms)]++;
+                    ret[addTerms(newTerms)]++;
+                }
             }
         }
     }
@@ -169,13 +203,30 @@ Expression* Addition::simplify() {
     // Combine ints
     ExpressionList terms;
     int intTerm = 0;
-    for (Expression*&term : getAdditiveTerms()) {
+    for (Expression*& term : getAdditiveTerms()) {
         term = term->simplify();
 
         Integer* termInt = NULL;
-        if (exprToTypedExpression(term, termInt))
-            intTerm += (int) termInt->getValue();
-        else
+        if (exprToTypedExpression(term, termInt)) {
+            intTerm += (int)termInt->getValue();
+            continue;
+        }
+
+        bool combined = false;
+        ExpressionList termList = term->getFactors();
+        for (Expression*& innerTerm : terms) {
+            ExpressionList innerTermList = innerTerm->getFactors();
+            Expression* common = multiplyFactors(getCommonFactors(termList, innerTermList))->simplify();
+            // NOTE: Maybe only combine if common isn't an int?
+            if (*common != *one) {
+                Expression* newAdd = (new Addition(new Division(innerTerm, common), new Division(term, common)))->simplify();
+                innerTerm = (new Multiplication(common, newAdd))->simplify();
+                combined = true;
+                break;
+            }
+        }
+
+        if (!combined)
             terms.push_back(term);
     }
 
@@ -190,6 +241,7 @@ Expression* Addition::simplify() {
                 if (!terms[i]->isNeg())
                     std::swap(terms[0], terms[i]);
 
+    // Factor!
     ExpressionList factors = addTerms(terms)->getFactors();
     if (factors.size() > 1)
         return multiplyFactors(factors)->simplify();

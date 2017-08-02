@@ -151,6 +151,7 @@ TEST_CASE("CAS") {
     }
 
     SECTION("Project Overview") {
+        test("x + x + 3", "2x + 3");
         test("(e - 1) / ((e ^ 2) - 1)", "1 / (e + 1)");
         test("2 rt ((pi ^ 2) + 2pi + 1)", "pi + 1");
         test("3 rt 8", "2");
@@ -167,5 +168,39 @@ TEST_CASE("CAS") {
         test("-0.5", "(-1) / 2");
         test("1.0", "1");
         test("-1.0", "-1");
+
+        /*SECTION("Example Expressions") {
+            SECTION("Common / Simplest") {
+                test("2 + 3 * 4 - 5 ^ 2", "-11");
+                test("2 ^ 3 + 4 * 5 - 2", "26");
+                test("( 2 + 3 ) * ( 4 - 5 ) ^ 2", "5");
+                test("1 / 3 + 1 / 4 + 1 / 12", "2 / 3");
+                test("105 / 1344", "5 / 64");
+                test("8 ^ ( -4 / 3 ) * 4", "1 / 4");
+                test("108 log 3", "2(2 log 3) + 3");
+            }
+
+            SECTION("More Complex") {
+                test("(-3) rt 8", "1 / 2");
+                test("3 rt 108 * 3 rt 16", "12");
+                test("3 * 2 rt 3 + 4 * 2 rt 3", "7(2 rt 3)");
+            }
+
+            SECTION("Simpler extra credit") {
+                test("( e ^ 3 ) log e", "3");
+                test("3 + 2 * pi - 1", "2pi + 2");
+                test("7 + 2 * e + 8 * e ^ ( 4 - 3 )", "10e + 7");
+            }
+
+            SECTION("Complex extra credit") {
+                test("4 log 64", "1 / 3");
+                test("2^(5/3 + pi) / (3rt4)", "2 ^ (1 + pi)");
+            }
+
+            SECTION("Extreme complexity") {
+                test("(7 - 3) log ( 2 rt 2 )", "4");
+                test("2^(5/3 + pi) / ((3 rt 4) * 2^pi)", "2");
+            }
+        }/**/
     }
 }

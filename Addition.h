@@ -9,6 +9,7 @@ public:
     double getValue() override;
 
     ExpressionList getNumeratorFactors() override;
+    ExpressionList getDenominatorFactors() override;
 
     ExpressionList getAdditiveTerms() override;
     Expression* simplify() override;

@@ -15,6 +15,8 @@ public:
     bool hasValue() override;
     bool hasExactValue() override;
 
+    Expression* simplify() override;
+
     std::string getString() override;
     std::string getTypeString() override { return "Variable"; };
 

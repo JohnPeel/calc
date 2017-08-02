@@ -7,18 +7,15 @@
 VariableList registeredVar;
 Expression* pi = new Variable("pi", new Float(M_PI));
 Expression* e = new Variable("e", new Float(M_E));
-Expression* i = new Variable("i", NULL);
+Expression* i = new Variable("i", nullptr);
 
-Variable::Variable(std::string name, Expression* value, bool registerThis) {
-    this->name = name;
-    this->value = value;
-
+Variable::Variable(std::string name, Expression* value, bool registerThis) : name(std::move(name)), value(value) {
     if (registerThis)
         registeredVar.add(this);
 }
 
 bool Variable::hasValue() {
-    return (value != NULL) && value->hasValue();
+    return (value != nullptr) && value->hasValue();
 }
 
 bool Variable::hasExactValue() {
@@ -29,12 +26,18 @@ double Variable::getValue() {
     return (hasValue()) ? value->getValue() : 0;
 }
 
+Expression* Variable::simplify() {
+    if ((name != "ans") || (value == nullptr))
+        return this;
+    return value->simplify();
+}
+
 std::string Variable::getString() {
-    return (name == "ans") ? value->getString() : name;
+    return ((name == "ans") && (value != nullptr)) ? value->getString() : name;
 }
 
 bool Variable::find(std::string name, Expression*& foundVar) {
-    return registeredVar.find(name, foundVar);
+    return registeredVar.find(std::move(name), foundVar);
 }
 
 void VariableList::add(Variable* var) {
@@ -46,5 +49,5 @@ void VariableList::add(Variable* var) {
 bool VariableList::find(std::string name, Expression *&foundVar) {
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
     foundVar = map[name];
-    return foundVar != NULL;
+    return foundVar != nullptr;
 }

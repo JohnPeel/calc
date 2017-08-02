@@ -65,7 +65,7 @@ Expression* Division::simplify() {
                 return multiplyFactors(allNum, true);
 
             if (allDen.size() > 0)
-                return new Division(multiplyFactors(allNum, true), multiplyFactors(allDen, true));
+                return new Division(multiplyFactors(allNum)->simplify(), multiplyFactors(allDen)->simplify());
         }
     }
 
